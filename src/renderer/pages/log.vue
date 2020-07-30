@@ -1,40 +1,6 @@
 <template>
   <div class="log">
-
-    <div class="log-header">
-      <span class="title">Logger</span>
-      状态： {{ intStatus }}
-      (如何连接<i class="el-icon-question"></i>)
-    </div>
-
-    <div class="table">
-      <el-button v-if="!status" @click="status = !status" icon="el-icon-video-play">开始监听数据</el-button>
-      <el-button v-else @click="status = !status" icon="el-icon-video-pause">停止监听数据</el-button>
-      <el-button @click="clearList" icon="el-icon-delete">清除数据</el-button>
-      <el-button @click="add">新增数据</el-button>
-
-      <!-- <el-table
-        :data="list"
-        style="width: 100%">
-        <el-table-column
-          prop="date"
-          label="日期"
-          width="180">
-        </el-table-column>
-        <el-table-column
-          prop="name"
-          label="姓名"
-          width="180">
-        </el-table-column>
-        <el-table-column
-          prop="address"
-          label="地址">
-        </el-table-column>
-      </el-table> -->
-
-      <div v-for="(v, i) in list" :key="i">{{v.txt}}</div>
-    </div>
-    
+    <div v-for="(v, i) in list" :key="i">{{v.txt}}</div>
   </div>
 </template>
 
@@ -108,4 +74,4 @@
 .table {
   margin: 24px;
 }
-</style>>
+</style>

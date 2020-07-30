@@ -1,174 +1,185 @@
 <template>
   <div id="app">
-    <router-view></router-view>
+    <div class="log-header">
+      <span class="title">Logger</span>
+      状态： {{ intStatus }}
+      (如何连接<i class="el-icon-question"></i>)
+    </div>
+    <el-tabs v-model="activeName" class="tab">
+      <el-tab-pane label="记录" name="record">
+        <div class="table">
+          <el-button v-if="!status" @click="status = !status" icon="el-icon-video-play">开始监听数据</el-button>
+          <el-button v-else @click="status = !status" icon="el-icon-video-pause">停止监听数据</el-button>
+          <el-button @click="clearList" icon="el-icon-delete">清除数据</el-button>
+          <el-button @click="add">新增数据</el-button>
+
+          <el-row class="lists-cont">
+            <el-col class="list1">
+              <h5 class="list-title">待测埋点列表</h5>
+              <el-menu
+                default-active="2"
+                class="el-menu-vertical-demo">
+                <el-menu-item v-for="(v, i) in rawList" :key="i" :index="'' + i">
+                  <i class="el-icon-menu"></i>
+                  <span slot="title">{{v.eventCname}}</span>
+                </el-menu-item>
+              </el-menu>
+            </el-col>
+            <el-col class="list2">
+              <h5 class="list-title">埋点详情</h5>
+            </el-col>
+            <el-col class="list3">
+              <h5 class="list-title">埋点记录</h5>
+              <el-menu
+                default-active="2"
+                class="el-menu-vertical-demo">
+                <el-menu-item v-for="(v, i) in rawList" :key="i" :index="'' + i">
+                  <i class="el-icon-menu"></i>
+                  <span slot="title">{{v.eventCname}}</span>
+                </el-menu-item>
+              </el-menu>
+            </el-col>
+          </el-row>
+        </div>
+      </el-tab-pane>
+      <el-tab-pane label="json配置" name="json">
+        <HandleExcel @excelJsonChange="excelJsonChange"/>
+      </el-tab-pane>
+    </el-tabs>
   </div>
 </template>
 
 <script>
+import HandleExcel from './components/handleExcel'
   export default {
-    name: 'logger'
+    components: {
+      HandleExcel
+    },
+    data() {
+      return {
+        intStatus: '未连接',
+        status: true,
+        activeName: 'record',
+        rawList: [],
+        list: [{
+          date: '2016-05-02',
+          txt: '王小虎0',
+        }, {
+          date: '2016-05-04',
+          txt: '王小虎1',
+        }, {
+          date: '2016-05-01',
+          txt: '王小虎123',
+        }, {
+          date: '2016-05-03',
+          txt: '王小虎4324',
+        }]
+      }
+    },
+    mounted () {
+      this.webSocket()
+    },
+    methods: {
+      excelJsonChange (list) {
+        this.rawList = list
+      },
+      add () {
+        this.list.push({
+          date: '123',
+          txt: '143132'
+        })
+        console.log(123, this.list.length);
+      },
+      clearList () {
+        this.list = []
+      },
+      webSocket () {
+        this.socket = new WebSocket('ws://localhost:3002/logger')
+        this.socket.addEventListener('open', (event) => {
+          this.intStatus = '已连接'
+        })
+        this.socket.addEventListener('error', (event) => {
+          console.log(event)
+        })
+        this.socket.addEventListener('message', (event) => {
+          if (!status) return 
+          this.list.push({
+            date: new Date(),
+            txt: event.data
+          })
+        })
+      },
+    },
   }
 </script>
 
-<style>
-html {
-  line-height: 1.15; /* 1 */
-  -webkit-text-size-adjust: 100%; /* 2 */
+<style lang="scss" scoped>
+.title {
+  font-size: 36px;
+  margin-right: 50px;
+  font-weight: 900;
 }
-body {
+.log-header {
+  background: rgba(48, 100, 239, 1);
+  color: #fff;
+  font-size: 24px;
+  padding: 24px;
+}
+.table {
+  // margin: 24px;
+}
+.header-tab {
+  
+}
+.tab {
+  margin: 10px;
+}
+.lists-cont {
+  display: flex;
+}
+.list1 {
+  height: 560px;
+  width: 300px;
+  overflow: scroll;
+  margin-top: 20px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  .list-title {
+    background: #fafafa;
+  }
+}
+.list-title {
+  height: 40px;
+  line-height: 40px;
+  padding: 0 20px;
   margin: 0;
 }
-main {
-  display: block;
+.list2 {
+  margin-left: 6px;
+  height: 560px;
+  width: 300px;
+  overflow: scroll;
+  margin-top: 20px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  color: rgb(255, 255, 255);
+  background-color: rgb(84, 92, 100);
+  .list-title {
+    background: rgb(30, 32, 34);
+  }
 }
-h1 {
-  font-size: 2em;
-  margin: 0.67em 0;
-}
-hr {
-  box-sizing: content-box; /* 1 */
-  height: 0; /* 1 */
-  overflow: visible; /* 2 */
-}
-pre {
-  font-family: monospace, monospace; /* 1 */
-  font-size: 1em; /* 2 */
-}
-a {
-  background-color: transparent;
-}
-abbr[title] {
-  border-bottom: none; /* 1 */
-  text-decoration: underline; /* 2 */
-  text-decoration: underline dotted; /* 2 */
-}
-b,
-strong {
-  font-weight: bolder;
-}
-code,
-kbd,
-samp {
-  font-family: monospace, monospace; /* 1 */
-  font-size: 1em; /* 2 */
-}
-small {
-  font-size: 80%;
-}
-sub,
-sup {
-  font-size: 75%;
-  line-height: 0;
-  position: relative;
-  vertical-align: baseline;
-}
-sub {
-  bottom: -0.25em;
-}
-sup {
-  top: -0.5em;
-}
-
-img {
-  border-style: none;
-}
-
-button,
-input,
-optgroup,
-select,
-textarea {
-  font-family: inherit; /* 1 */
-  font-size: 100%; /* 1 */
-  line-height: 1.15; /* 1 */
-  margin: 0; /* 2 */
-}
-
-button,
-input { /* 1 */
-  overflow: visible;
-}
-
-button,
-select { /* 1 */
-  text-transform: none;
-}
-
-button,
-[type="button"],
-[type="reset"],
-[type="submit"] {
-  -webkit-appearance: button;
-}
-
-
-button::-moz-focus-inner,
-[type="button"]::-moz-focus-inner,
-[type="reset"]::-moz-focus-inner,
-[type="submit"]::-moz-focus-inner {
-  border-style: none;
-  padding: 0;
-}
-
-button:-moz-focusring,
-[type="button"]:-moz-focusring,
-[type="reset"]:-moz-focusring,
-[type="submit"]:-moz-focusring {
-  outline: 1px dotted ButtonText;
-}
-
-fieldset {
-  padding: 0.35em 0.75em 0.625em;
-}
-
-
-legend {
-  box-sizing: border-box; /* 1 */
-  color: inherit; /* 2 */
-  display: table; /* 1 */
-  max-width: 100%; /* 1 */
-  padding: 0; /* 3 */
-  white-space: normal; /* 1 */
-}
-
-
-progress {
-  vertical-align: baseline;
-}
-
-textarea {
-  overflow: auto;
-}
-[type="checkbox"],
-[type="radio"] {
-  box-sizing: border-box; /* 1 */
-  padding: 0; /* 2 */
-}
-[type="number"]::-webkit-inner-spin-button,
-[type="number"]::-webkit-outer-spin-button {
-  height: auto;
-}
-[type="search"] {
-  -webkit-appearance: textfield; /* 1 */
-  outline-offset: -2px; /* 2 */
-}
-[type="search"]::-webkit-search-decoration {
-  -webkit-appearance: none;
-}
-::-webkit-file-upload-button {
-  -webkit-appearance: button; /* 1 */
-  font: inherit; /* 2 */
-}
-details {
-  display: block;
-}
-summary {
-  display: list-item;
-}
-template {
-  display: none;
-}
-[hidden] {
-  display: none;
+.list3 {
+  flex: 1;
+  margin-left: 6px;
+  height: 560px;
+  overflow: scroll;
+  margin-top: 20px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  color: rgb(255, 255, 255);
+  background-color: rgb(84, 92, 100);
+  .list-title {
+    background: rgb(30, 32, 34);
+  }
 }
 </style>

@@ -22,15 +22,16 @@
   },
   "dependencies": {
     "axios": "^0.18.0",
-    "element-ui": "^2.13.2",
-    "vue": "^2.5.16",
-    "vue-electron": "^1.0.6",
-    "vue-router": "^3.0.1",
     "body-parser": "^1.18.3",
     "cookie-parser": "^1.4.3",
     "ejs": "^2.6.1",
+    "element-ui": "^2.13.2",
     "express": "^4.16.4",
-    "express-ws": "^4.0.0"
+    "express-ws": "^4.0.0",
+    "vue": "^2.5.16",
+    "vue-electron": "^1.0.6",
+    "vue-router": "^3.0.1",
+    "xlsx": "^0.16.4"
   },
   "devDependencies": {
     "ajv": "^6.5.0",
