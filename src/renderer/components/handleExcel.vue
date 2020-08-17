@@ -36,11 +36,25 @@
         reader.onload = ev => {
           let workBook = XLSX.read(ev.target.result, {type: 'binary', cellDates: true})
           let workSheet = workBook.Sheets[workBook.SheetNames[0]]
+
+          workSheet['!ref'] = workSheet['!ref'].replace('A1', 'D2')
           const data = XLSX.utils.sheet_to_json(workSheet)
-          console.log(data)
-          let res = formatAllXlsxJson(data, ['事件中文名', 'event_id', '页面'])
-          
-          this.$emit('excelJsonChange', getUpTableCellValue(res))
+          const formatDate = data.map((item) => {
+            let infoList = []
+            Object.entries(item).forEach(([k, v]) => {
+              infoList.push({
+                key: k,
+                value: v
+              })
+            })
+            return {
+              name: item['事件中文名'],
+              status: '',
+              infoList: infoList,
+              raw: item
+            }
+          })
+          this.$emit('excelJsonChange', formatDate)
         }
       },
     }
@@ -48,5 +62,14 @@
 </script>
 
 <style>
-  
+  .upload-demo {
+    margin-top: 20px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+  }
+  .el-upload-dragger {
+    margin: 20px !important;
+  }
 </style>

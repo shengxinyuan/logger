@@ -158,3 +158,20 @@ template {
 [hidden] {
   display: none;
 }
+
+.el-menu-item-group .el-menu-item-group__title {
+  background: #fafafa !important;
+}
+.el-collapse-item__content {
+  padding-bottom: 0 !important;
+}
+
+.list2-item .el-collapse-item__header {
+  background-color: rgb(84, 92, 100);
+  border-bottom: 0;
+  color: #fff;
+}
+
+.empty .el-icon-arrow-right {
+  opacity: 0;
+}

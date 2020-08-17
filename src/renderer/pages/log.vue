@@ -43,6 +43,7 @@
         this.socket = new WebSocket('ws://localhost:3002/logger')
         this.socket.addEventListener('open', (event) => {
           this.intStatus = '已连接'
+          console.log('event', event);
         })
         this.socket.addEventListener('error', (event) => {
           console.log(event)

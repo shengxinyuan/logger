@@ -1,3 +1,16 @@
+const loggersParams = [
+  
+  'event_type',
+  'event_id',
+  'pagename',
+  'pdt',
+  'pdid',
+  'uiname',
+  'dt',
+  'did',
+  'extend1'
+]
+
 // 补全合并单元格内读取不到的json数据
 function formatAllXlsxJson (list, filterMeuns) {
   let meunObj = {}
@@ -11,7 +24,14 @@ function formatAllXlsxJson (list, filterMeuns) {
   list.map((v, i) => {
     if (i !== 0) {
       newList.push({
-        eventCname: v[meunObj['事件中文名']] || '',
+        name: v[meunObj['事件中文名']] || '',
+        status: '',
+        infoList: loggersParams.map((item) => {
+          return {
+            key: item,
+            value: v[meunObj[item]] || ''
+          }
+        }),
         page: v[meunObj['页面']],
         eventId: v[meunObj['event_id']],
       })

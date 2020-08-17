@@ -33,6 +33,7 @@ function getIPAdress(){
     for(let i=0;i<iFace.length;i++){
       const alias = iFace[i];
       if(alias.family === 'IPv4' && alias.address !== '127.0.0.1' && !alias.internal){
+        console.log('address',alias.address);
         return alias.address;
       }
     }
