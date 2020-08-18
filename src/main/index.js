@@ -1,4 +1,4 @@
-import { app, BrowserWindow } from 'electron'
+import { app, BrowserWindow, globalShortcut } from 'electron'
 
 /**
  * Set `__static` path to static files in production
@@ -28,17 +28,32 @@ function createWindow () {
   mainWindow.on('closed', () => {
     mainWindow = null
   })
+
+  mainWindow.on('focus', () => {
+    globalShortcut.register('CommandOrControl+F', function () {
+      if (mainWindow && mainWindow.webContents) {
+        mainWindow.webContents.send('on-find', '')
+      }
+    })
+  })
+  mainWindow.on('blur', () => {
+    globalShortcut.unregister('CommandOrControl+F')
+  })
+
+  mainWindow.webContents.openDevTools()
 }
 
 app.on('ready', () => {
   require('./server.js')
   createWindow()
+
 })
 
 app.on('window-all-closed', () => {
   if (process.platform !== 'darwin') {
     app.quit()
   }
+  globalShortcut.unregister('CommandOrControl+F')
 })
 
 app.on('activate', () => {

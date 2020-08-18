@@ -166,12 +166,12 @@ template {
   padding-bottom: 0 !important;
 }
 
-.list2-item .el-collapse-item__header {
+/* .list2-item .el-collapse-item__header {
   background-color: rgb(84, 92, 100);
   border-bottom: 0;
   color: #fff;
-}
+} */
 
-.empty .el-icon-arrow-right {
-  opacity: 0;
+.select  .flex1 {
+  color: rgba(48, 100, 239, 1);
 }

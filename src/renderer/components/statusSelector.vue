@@ -49,13 +49,16 @@
   }
 </script>
 
-<style scoped>
+<style scoped lang="scss">
   .cont {
     position: absolute;
     left: 0;
     display: block;
     margin: 0 6px;
     z-index: 2;
+    .el-button--mini.is-circle {
+      padding: 4px !important;
+    }
   }
   
 </style>

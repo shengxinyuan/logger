@@ -7,7 +7,6 @@
       action="https://jsonplaceholder.typicode.com/posts/"
       :file-list="fileList"
       :on-change="onChange"
-      accept="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel"
       :auto-upload="false">
       <i class="el-icon-upload"></i>
       <div class="el-upload__text">将文件拖到此处，或<em>点击上传</em></div>
@@ -36,7 +35,7 @@
         reader.onload = ev => {
           let workBook = XLSX.read(ev.target.result, {type: 'binary', cellDates: true})
           let workSheet = workBook.Sheets[workBook.SheetNames[0]]
-
+          console.log(workSheet);
           workSheet['!ref'] = workSheet['!ref'].replace('A1', 'D2')
           const data = XLSX.utils.sheet_to_json(workSheet)
           const formatDate = data.map((item) => {

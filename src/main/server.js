@@ -52,9 +52,11 @@ expressApp.ws('/logger', function (ws, req) {
   ws.send('设备连接成功了')
 
   ws.on('message', function (msg) {
-    clients.forEach(ws => {
-      ws.send((new Date()).toLocaleString() + ' :  ' + msg)
-    })
+    if (/[HxBI]/.test(msg)) {
+      clients.forEach(ws => {
+        ws.send(msg)
+      })
+    }
   })
 
   ws.on('close', function (msg) {

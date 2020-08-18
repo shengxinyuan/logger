@@ -25,9 +25,6 @@
       icon() {
         return this.status == 1 ? 'el-icon-check' : this.status == 2 ? 'el-icon-close' : 'el-icon-edit'
       }
-    },
-    methods: {
-
     }
   }
 </script>

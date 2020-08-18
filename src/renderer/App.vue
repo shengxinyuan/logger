@@ -1,17 +1,18 @@
 <template>
-  <div id="app">
+  <div class="app">
     <div class="log-header">
       <span class="title">Logger</span>
-      状态： {{ intStatus }}
-      (如何连接<i class="el-icon-question"></i>)
+      状态： <span class="net-status">{{ intStatus }}</span>
+       <span class="net-status"> [ip：{{ ip }}、</span>
+      <span class="net-status">port：{{ port }}]</span>
     </div>
     <el-tabs v-model="activeName" class="tab">
       <el-tab-pane label="logger记录" name="record">
         <div class="table">
-          <el-row class="lists-cont">
-            <el-col class="list1">
+          <div class="flex">
+            <el-col class="list list1">
               <h5 class="list-title">待测埋点列表</h5>
-              <el-collapse accordion @change="selectTester">
+              <el-collapse accordion @change="selectTester" class="list-cont">
                 <el-collapse-item v-for="(v, i) in rawList" :key="i" :name="i">
                   <template slot="title">
                     <div class="title-box">
@@ -29,25 +30,21 @@
               </el-collapse>
             </el-col>
 
-            <el-col class="list2" v-if="selectedItem">
+            <el-col class="list list2" v-if="selectedItem">
               <h5 class="list-title">
                 功能测试点详情
-                <el-button class="marginH20" size="mini" icon="el-icon-delete" type="info" @click="clearSelectedLoggerList"></el-button>
+                <el-button class="marginH20" size="mini" icon="el-icon-delete" @click="clearSelectedLoggerList"></el-button>
               </h5>
-              <el-collapse   class="list2-item-box">
+              <el-collapse class="list2-item-box list-cont">
                 <el-collapse-item 
                   v-for="(selectedLogger, i) in selectedLoggerList"
                   :key="i"
                   :name="i"
                   class="list2-item" 
-                  :class="selectedLogger.eventId !== selectedItem.raw['event_id'] ? 'empty' : ''"
+                  :class="selectedLogger.eventId === selectedItem.raw['event_id'] ? 'select' : ''"
                 >
                   <template slot="title">
-                    <div v-if="selectedLogger.eventId !== selectedItem.raw['event_id']" class="list2-item-title-box empty" @click.stop>
-                      <p class="flex1">{{selectedLogger.eventId}}</p>
-                      <p>次数：{{selectedLogger.counter}}</p>
-                    </div>
-                    <div v-else class="list2-item-title-box">
+                    <div class="list2-item-title-box">
                       <p class="flex1">{{selectedLogger.eventId}}</p>
                       <p>次数：{{selectedLogger.counter}}</p>
                     </div>
@@ -61,8 +58,8 @@
                       </template>
                       <div class="detail-cont">
                         <div class="detail-info" v-for="(val, index1) in item.infoList" :key="index1">
-                          <span class="detail-info-key" v-if="val.status != 0">{{val.key}}<statusIcon v-if="val.status != 0" :status="val.status" />:</span>
-                          <span class="detail-info-value" v-if="val.status != 0">{{val.value}}</span>
+                          <span class="detail-info-key">{{val.key}}<statusIcon v-if="selectedLogger.eventId === selectedItem.raw['event_id'] && val.status != 0" :status="val.status" />:</span>
+                          <span class="detail-info-value">{{val.value}}</span>
                         </div>
                       </div>
                     </el-collapse-item>
@@ -71,22 +68,22 @@
               </el-collapse>
             </el-col>
 
-            <el-col class="list3">
+            <el-col class="list list3">
               <div class="list-title">
                 <span class="label">埋点记录</span>
                 <el-button size="mini" v-if="!status" @click="status = !status" icon="el-icon-video-play" type="primary"></el-button>
                 <el-button size="mini" v-else @click="status = !status" icon="el-icon-video-pause" type="danger"></el-button>
-                <el-button size="mini" @click="clearList" icon="el-icon-delete" type="info"></el-button>
+                <el-button size="mini" @click="clearList" icon="el-icon-delete"></el-button>
                 <el-button size="mini" @click="testAdd1">+</el-button>
                 <el-button size="mini" @click="testAdd2">+</el-button>
               </div>
-              <div class="list3-item-box" ref="list3">
+              <div class="list3-item-box list-cont" ref="list3">
                 <div class="list3-item" v-for="(v, i) in list" :key="i">
                   {{v}}
                 </div>
               </div>
             </el-col>
-          </el-row>
+          </div>
         </div>
       </el-tab-pane>
       <el-tab-pane label="上传埋点文件" name="json">
@@ -100,6 +97,7 @@
   import HandleExcel from './components/handleExcel'
   import StatusSelector from './components/statusSelector'
   import StatusIcon from './components/statusIcon'
+  import getIPAdress from '../utils/getIPAdress'
 
   export default {
     components: {
@@ -160,10 +158,13 @@
         selectedItem: '',
         selectedLoggerList: [],
         list: [],
+        ip: '',
+        port: '3002'
       }
     },
     mounted () {
       this.webSocket()
+      this.ip = getIPAdress()
     },
     methods: {
       selectTester(index) {
@@ -178,12 +179,29 @@
       
       addLogger (event) {
         if (this.status) {
-          const raw = event.data
+          let raw = event.data
+          if (/^\[HxBI/.test(raw)) {
+            // iOS
+            try {
+              let rawJson = raw.replace('[HxBI]: ', '')
+              raw = JSON.parse(rawJson)
+            } catch (error) {
+            }
+          } else {
+            // android
+            try {
+              raw = JSON.parse(raw)
+            } catch (error) {
+            }
+          }
+
+          // console.log(raw);
+
           this.list.push(raw)
           if (this.selectedItem) {
             const reg = /^[Y]\(/;
             let hasEventId = false
-            let eventId = raw['event_id']
+            let eventId = raw['event_id'] || raw['eventId']
             let isSelect = this.selectedItem.raw['event_id'] === eventId
             let infoList = []
             
@@ -210,14 +228,12 @@
             
             this.selectedLoggerList.forEach((val, index) => {
               if (val.eventId === eventId) {
-                if (isSelect) {
-                  val.children.push({
-                    eventId: eventId,
-                    infoList: infoList,
-                    raw: raw,
-                    num: val.children.length + 1 || 0
-                  })
-                }
+                val.children.push({
+                  eventId: eventId,
+                  infoList: infoList,
+                  raw: raw,
+                  num: val.children.length + 1 || 0
+                })
                 val.counter++
                 hasEventId = true
               }
@@ -231,7 +247,12 @@
                   infoList: infoList,
                   raw: raw,
                   num: 1
-                }] : []
+                }] : [{
+                  eventId: eventId,
+                  infoList: infoList,
+                  raw: raw,
+                  num: 1
+                }]
               })
             }
           }
@@ -250,7 +271,7 @@
       webSocket () {
         this.socket = new WebSocket('ws://localhost:3002/logger')
         this.socket.addEventListener('open', (event) => {
-          this.intStatus = '已连接'
+          this.intStatus = '服务已启动'
         })
         this.socket.addEventListener('error', (event) => {
           console.log(event)
@@ -303,36 +324,27 @@
 
 .app {
   height: 100vh;
-  .title {
-    font-size: 36px;
-    margin-right: 50px;
-    font-weight: 900;
-  }
 }
 .log-header {
   background: rgba(48, 100, 239, 1);
   color: #fff;
   font-size: 24px;
-  padding: 6px 24px;
+  padding: 6px 16px;
+  .net-status {
+    font-size: 18px;
+  }
 }
 .tab {
-  margin: 10px;
-}
-.lists-cont {
-  display: flex;
-}
-.el-submenu-title {
-  height: 36px;
-  line-height: 36px;
+  margin: 10px 15px;
 }
 .detail-cont {
   display: block;
-  background: #fafafa;
+  border-top: 1px solid #E4E7ED;
 }
 .detail-info {
   padding: 0 0 0 10px;
   line-height: 20px;
-  font-size: 14px;
+  font-size: 12px;
   font-family: Arial, Helvetica, sans-serif;
   display: flex;
   .detail-info-key {
@@ -354,12 +366,21 @@
   margin: 0;
   font-size: 16px;
 }
-.list1 {
-  height: calc(100vh - 130px);
-  width: 300px;
-  overflow: scroll;
+
+.list {
+  height: calc(100vh - 115px);
   border: 1px solid #E4E7ED;
   border-radius: 4px;
+  background: #fafafa;
+  display: flex;
+  flex-direction: column;
+  .list-cont {
+    flex: 1;
+    overflow-y: scroll;
+  }
+} 
+.list1 {
+  width: 300px;
   .list-title {
     background: #fafafa;
   }
@@ -370,37 +391,27 @@
     height: 48px;
     width: 100%;
     .name {
-      margin-left: 40px;
+      margin-left: 32px;
       flex: 1;
       overflow: hidden;
     }
   }
 }
 .list2 {
-  display: flex;
-  flex-direction: column;
   margin-left: 6px;
-  height: calc(100vh - 130px);
   width: 300px;
-  overflow: scroll;
-  border: 1px solid #E4E7ED;
-  border-radius: 4px;
-  color: rgb(255, 255, 255);
-  background-color: rgb(84, 92, 100);
   .list-title {
-    background: rgb(30, 32, 34);
+    background: #fafafa;
   }
   .list2-item-box {
     flex: 1;
-    overflow: scroll;
     color: rgb(255, 255, 255);
     font-family: Arial, Helvetica, sans-serif;
   }
   .list2-item {
     width: 100%;
-    word-break:break-all;
-    word-wrap:break-word;
-    overflow: hidden;
+    word-break: break-all;
+    word-wrap: break-word;
     border-bottom: 1px solid rgb(241, 241, 241);
     font-size: 12px;
   }
@@ -416,12 +427,6 @@
 .list3 {
   flex: 1;
   margin-left: 6px;
-  height: calc(100vh - 130px);
-  overflow-y: scroll;
-  border: 1px solid #E4E7ED;
-  border-radius: 4px;
-  display: flex;
-  flex-direction: column;
   .list-title {
     border-bottom: 1px solid #E4E7ED;
     background: #fafafa;
@@ -431,19 +436,18 @@
   }
   .list3-item-box {
     flex: 1;
-    overflow: scroll;
   }
   .list3-item {
     box-sizing: border-box;
     width: 100%;
     word-break:break-all;
     word-wrap:break-word;
-    overflow: hidden;
     color: #000;
     border-bottom: 1px solid #E4E7ED;
     font-size: 12px;
     line-height: 1.2;
     padding: 4px 16px;
+    background: #fff;
     font-family: Arial, Helvetica, sans-serif;
   }
 }
