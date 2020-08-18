@@ -3,8 +3,8 @@
     <div class="log-header">
       <span class="title">Logger</span>
       状态： <span class="net-status">{{ intStatus }}</span>
-       <span class="net-status"> [ip：{{ ip }}、</span>
-      <span class="net-status">port：{{ port }}]</span>
+       <span class="net-status"> [--ip：{{ ip }}</span>
+      <span class="net-status">--port：{{ port }}]</span>
     </div>
     <el-tabs v-model="activeName" class="tab">
       <el-tab-pane label="logger记录" name="record">
@@ -159,7 +159,7 @@
         selectedLoggerList: [],
         list: [],
         ip: '',
-        port: '3002'
+        port: '3003'
       }
     },
     mounted () {
@@ -269,7 +269,7 @@
         this.selectedLoggerList = []
       },
       webSocket () {
-        this.socket = new WebSocket('ws://localhost:3002/logger')
+        this.socket = new WebSocket('ws://localhost:3003/logger')
         this.socket.addEventListener('open', (event) => {
           this.intStatus = '服务已启动'
         })

@@ -9,7 +9,7 @@ const expressWs = require('express-ws');
 const clients = [];
 
 // 监听端口，启动程序
-const port = 3002;
+const port = 3003;
 // ip地址
 const ip = getIPAdress();
 
@@ -52,7 +52,8 @@ expressApp.ws('/logger', function (ws, req) {
   ws.send('设备连接成功了')
 
   ws.on('message', function (msg) {
-    if (/[HxBI]/.test(msg)) {
+    console.log(msg);
+    if (/[HxBI]/.test(msg) || /[event_id]/.test(msg)) {
       clients.forEach(ws => {
         ws.send(msg)
       })
