@@ -195,6 +195,8 @@
             } catch (error) {
               console.log('android', error);
             }
+          } else {
+            return 
           }
 
           this.list.push(raw)
@@ -213,7 +215,7 @@
                 status = 1
               } else if (value !== v && !reg.test(value)) {
                 status = 2
-              } else if (value !== v && reg.test(value)) {
+              } else if (value !== v && (reg.test(value) || k === 'extend1')) {
                 status = 3
               } else {
                 status = 4
