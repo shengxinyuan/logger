@@ -281,7 +281,7 @@
         this.socket.addEventListener('message', this.addLogger)
       },
       testAdd1 () {
-        this.addLogger({data: {
+        this.addLogger({data: JSON.stringify({
           "logtime":"2020-08-14 20:29:49",
           "platform":"android",
           "version":"8.7.1",
@@ -297,10 +297,10 @@
           "guid":"461415703",
           "pagename":"settestpagenameting",
           "pdt":"1",
-        }})
+        })})
       },
       testAdd2 () {
-        this.addLogger({data: {
+        this.addLogger({data: JSON.stringify({
           "logtime":"2020-08-14 20:29:49",
           "platform":"android",
           "version":"8.7.1",
@@ -316,7 +316,7 @@
           "guid":"461415703",
           "pagename":"openapp",
           "pdt":"1",
-        }})
+        })})
       },
     },
   }
