@@ -35,9 +35,13 @@
         reader.onload = ev => {
           let workBook = XLSX.read(ev.target.result, {type: 'binary', cellDates: true})
           let workSheet = workBook.Sheets[workBook.SheetNames[0]]
-          console.log(workSheet);
+          
           workSheet['!ref'] = workSheet['!ref'].replace('A1', 'D2')
-          const data = XLSX.utils.sheet_to_json(workSheet)
+          let data = XLSX.utils.sheet_to_json(workSheet)
+          data = data.filter((val) => {
+            return val['任务版本'] === workBook.SheetNames[0]
+          })
+          console.log(data);
           const formatDate = data.map((item) => {
             let infoList = []
             Object.entries(item).forEach(([k, v]) => {

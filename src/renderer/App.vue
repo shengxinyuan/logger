@@ -11,12 +11,21 @@
         <div class="table">
           <div class="flex">
             <el-col class="list list1">
-              <h5 class="list-title">待测埋点列表</h5>
+              <h5 class="list-title">
+                待测埋点列表
+                <span class="fliter-box">
+                  筛选：<input type="text" v-model="fliterName">
+                </span>
+              </h5>
               <el-collapse accordion @change="selectTester" class="list-cont">
-                <el-collapse-item v-for="(v, i) in rawList" :key="i" :name="i">
+                <el-collapse-item v-for="(v, i) in filterRowList" :key="i" :name="i">
                   <template slot="title">
                     <div class="title-box">
-                      <span class="name">{{i + 1}}. {{v.name}}</span>
+                      <div class="index">{{i + 1}}. </div>
+                      <div class="name">
+                        <div class="txt">{{v.name}}</div>
+                        <div class="txt">{{v.raw['event_id'] || v.raw['eventId']}}</div>
+                      </div>
                       <StatusSelector v-model="v.status" @click.stop.native />
                     </div>
                   </template>
@@ -50,9 +59,9 @@
                     </div>
                   </template>
                   <el-collapse class="list2-item-box" v-if="selectedLogger.children">
-                    <el-collapse-item v-for="(item, index) in selectedLogger.children" :key="index" :name="index" class="list2-item">
-                      <template slot="title">
-                        <div class="list2-item-title-box">
+                    <el-collapse-item v-for="(item, index) in selectedLogger.children" :key="item.infoList.time" :name="index" class="list2-item">
+                      <template slot="title" >
+                        <div class="list2-item-title-box" @click="showRight(item.raw.time)">
                           <p class="flex1 pd-left20">第{{item.num}}次 详细数据</p>
                         </div>
                       </template>
@@ -78,7 +87,7 @@
                 <el-button size="mini" @click="testAdd2">+</el-button>
               </div>
               <div class="list3-item-box list-cont" ref="list3">
-                <div class="list3-item" v-for="(v, i) in list" :key="i">
+                <div class="list3-item" v-for="(v, i) in list" :key="v.time || i" :class="v.time === rightKey ? 'on' : ''">
                   {{v}}
                 </div>
               </div>
@@ -122,6 +131,7 @@
               'event_type':'P',
               'pagename':'testpagename',
               'pdt':'Y(0|1 是否当日看到test页面)',
+              'extend1': '{"params1":"aaa"}'
             },
             infoList: [
               {
@@ -152,6 +162,10 @@
                 key: 'pdt',
                 value: 'Y(0|1 是否当日看到test页面)'
               },
+              {
+                key: 'extend1',
+                value: '{"params1":"aaa"}'
+              }
             ]
           },
         ],
@@ -159,7 +173,28 @@
         selectedLoggerList: [],
         list: [],
         ip: '',
-        port: '3003'
+        port: '3003',
+        rightKey: '',
+        fliterName: '',
+      }
+    },
+    computed: {
+      filterRowList() {
+        if (!this.fliterName) {
+          return this.rawList
+        }
+        let list = []
+        let name = this.fliterName
+        this.rawList.forEach((val) => {
+          let status = val.infoList.some((v) => {
+            return v.value.includes(name)
+          })
+          if (status) {
+            list.push(val)
+          }
+        })
+        
+        return list
       }
     },
     mounted () {
@@ -167,14 +202,18 @@
       this.ip = getIPAdress()
     },
     methods: {
+      showRight (time) {
+        this.rightKey = time
+      },
       selectTester(index) {
-        this.selectedItem = this.rawList[index]
+        this.selectedItem = this.filterRowList[index]
         if (this.selectedItem) {
           this.selectedLoggerList = []
         }
+        this.rightKey = ''
       },
       excelJsonChange (list) {
-        this.rawList = [...this.rawList, ...list]
+        this.rawList = [...list]
       },
       
       addLogger (event) {
@@ -199,9 +238,13 @@
             return 
           }
 
+          if (typeof raw === 'object') {
+            raw.time = +new Date()
+          }
+
           this.list.push(raw)
           if (this.selectedItem) {
-            const reg = /^[Y]\(/;
+            const reg = /^[Y]|\u679a\u4e3e/;
             let hasEventId = false
             let eventId = raw['event_id'] || raw['eventId']
             let isSelect = this.selectedItem.raw['event_id'] === eventId
@@ -213,10 +256,10 @@
                 status = 0
               } else if (value === v) {
                 status = 1
-              } else if (value !== v && !reg.test(value)) {
-                status = 2
               } else if (value !== v && (reg.test(value) || k === 'extend1')) {
                 status = 3
+              } else if (value !== v && !reg.test(value)) {
+                status = 2
               } else {
                 status = 4
               }
@@ -291,12 +334,16 @@
           "os_version":"10",
           "network_type":"wifi",
           "shw":"1440*2792",
-          "event_id":"hx_P_test_test_test_test_test_test_test_test",
+          "event_id":"hx_P_test",
           "event_type":"P",
           "load_source":"1000014",
           "guid":"461415703",
           "pagename":"settestpagenameting",
           "pdt":"1",
+          "extend1": {
+            'aaa': 1,
+            'bbb': 2
+          }
         })})
       },
       testAdd2 () {
@@ -346,7 +393,7 @@
 .detail-info {
   padding: 0 0 0 10px;
   line-height: 20px;
-  font-size: 12px;
+  font-size: 14px;
   font-family: Arial, Helvetica, sans-serif;
   display: flex;
   .detail-info-key {
@@ -376,15 +423,21 @@
   background: #fafafa;
   display: flex;
   flex-direction: column;
+  font-size: 14px;
   .list-cont {
     flex: 1;
     overflow-y: scroll;
   }
 } 
 .list1 {
-  width: 300px;
+  width: 400px;
   .list-title {
     background: #fafafa;
+    .fliter-box {
+      font-size: 14px;
+      margin-left: 20px;
+      font-weight: normal;
+    }
   }
   .title-box {
     font-family: Arial, Helvetica, sans-serif;  
@@ -392,16 +445,26 @@
     display: flex;
     height: 48px;
     width: 100%;
+    .index {
+      margin-left: 36px;
+    }
     .name {
-      margin-left: 32px;
+      margin-left: 8px;
       flex: 1;
+      display: flex;
       overflow: hidden;
+      height: 100%;
+      justify-content: center;
+      flex-direction: column;
+      .txt {
+        line-height: 1.4;
+      }
     }
   }
 }
 .list2 {
   margin-left: 6px;
-  width: 300px;
+  width: 400px;
   .list-title {
     background: #fafafa;
   }
@@ -415,7 +478,7 @@
     word-break: break-all;
     word-wrap: break-word;
     border-bottom: 1px solid rgb(241, 241, 241);
-    font-size: 12px;
+    font-size: 14px;
   }
   .list2-item-title-box {
     width: 100%;
@@ -452,11 +515,14 @@
     word-wrap:break-word;
     color: #000;
     border-bottom: 1px solid #E4E7ED;
-    font-size: 12px;
+    font-size: 14px;
     line-height: 1.2;
     padding: 4px 16px;
     background: #fff;
     font-family: Arial, Helvetica, sans-serif;
+  }
+  .on {
+    background: #ccc;
   }
 }
 .flex {
