@@ -187,13 +187,12 @@
         let name = this.fliterName
         this.rawList.forEach((val) => {
           let status = val.infoList.some((v) => {
-            return v.value.includes(name)
+            return v && v.value && v.value.includes(name)
           })
           if (status) {
             list.push(val)
           }
         })
-        
         return list
       }
     },
@@ -256,7 +255,7 @@
                 status = 0
               } else if (value === v) {
                 status = 1
-              } else if (value !== v && (reg.test(value) || k === 'extend1')) {
+              } else if (value !== v && (reg.test(value) || k === 'extend1' || k === 'param')) {
                 status = 3
               } else if (value !== v && !reg.test(value)) {
                 status = 2
