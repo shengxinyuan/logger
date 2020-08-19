@@ -46,7 +46,7 @@
                   <template slot="title">
                     <div class="list2-item-title-box">
                       <p class="flex1">{{selectedLogger.eventId}}</p>
-                      <p>次数：{{selectedLogger.counter}}</p>
+                      <p class="rightTxt">次数：{{selectedLogger.counter}}</p>
                     </div>
                   </template>
                   <el-collapse class="list2-item-box" v-if="selectedLogger.children">
@@ -186,16 +186,16 @@
               let rawJson = raw.replace('[HxBI]: ', '')
               raw = JSON.parse(rawJson)
             } catch (error) {
+              console.log('iOS', error);
             }
-          } else {
+          } else if (/android/.test(raw)) {
             // android
             try {
               raw = JSON.parse(raw)
             } catch (error) {
+              console.log('android', error);
             }
           }
-
-          // console.log(raw);
 
           this.list.push(raw)
           if (this.selectedItem) {
@@ -289,7 +289,7 @@
           "os_version":"10",
           "network_type":"wifi",
           "shw":"1440*2792",
-          "event_id":"hx_P_test",
+          "event_id":"hx_P_test_test_test_test_test_test_test_test",
           "event_type":"P",
           "load_source":"1000014",
           "guid":"461415703",
@@ -417,8 +417,14 @@
   }
   .list2-item-title-box {
     width: 100%;
+    height: 100%;
+    line-height: 1;
     display: flex;
+    align-items: center;
     margin-left: 20px;
+    .rightTxt {
+      margin-left: 4px;
+    }
   }
   .detail-info-key {
     width: 120px;

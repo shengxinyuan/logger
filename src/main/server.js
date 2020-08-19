@@ -52,7 +52,9 @@ expressApp.ws('/logger', function (ws, req) {
   ws.send('设备连接成功了')
 
   ws.on('message', function (msg) {
-    console.log(msg);
+    if (/^[HxC]/.test(msg)) {
+      return
+    }
     if (/[HxBI]/.test(msg) || /[event_id]/.test(msg)) {
       clients.forEach(ws => {
         ws.send(msg)
