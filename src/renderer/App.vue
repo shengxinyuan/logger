@@ -14,11 +14,13 @@
               <h5 class="list-title">
                 待测埋点列表
                 <span class="fliter-box">
-                  筛选：<input type="text" v-model="fliterName">
+                  <el-input size="small" clearable placeholder="请输入条件" v-model="fliterName" class="input-with-select">
+                    <el-button slot="append" icon="el-icon-search" class="btn" @click="filter"></el-button>
+                  </el-input>
                 </span>
               </h5>
               <el-collapse accordion @change="selectTester" class="list-cont">
-                <el-collapse-item v-for="(v, i) in filterRowList" :key="i" :name="i">
+                <el-collapse-item v-for="(v, i) in rawList" :key="i" :name="i">
                   <template slot="title">
                     <div class="title-box">
                       <div class="index">{{i + 1}}. </div>
@@ -119,6 +121,56 @@
         intStatus: '未连接',
         status: true,
         activeName: 'record',
+        json: [
+          {
+            name: '默认埋点Test',
+            status: '',
+            raw: {
+              '页面':'Test页面',
+              '事件':'Test事件',
+              '事件中文名':'默认埋点Test',
+              'event_id':'hx_P_test',
+              'event_type':'P',
+              'pagename':'testpagename',
+              'pdt':'Y(0|1 是否当日看到test页面)',
+              'extend1': '{"params1":"aaa"}'
+            },
+            infoList: [
+              {
+                key: '页面',
+                value: 'Test页面'
+              },
+              {
+                key: '事件',
+                value: 'Test事件'
+              },
+              {
+                key: '事件中文名',
+                value: '默认埋点Test'
+              },
+              {
+                key: 'event_id',
+                value: 'hx_P_test'
+              },
+              {
+                key: 'event_type',
+                value: 'P'
+              },
+              {
+                key: 'pagename',
+                value: 'testpagename'
+              },
+              {
+                key: 'pdt',
+                value: 'Y(0|1 是否当日看到test页面)'
+              },
+              {
+                key: 'extend1',
+                value: '{"params1":"aaa"}'
+              }
+            ]
+          },
+        ],
         rawList: [
           {
             name: '默认埋点Test',
@@ -176,24 +228,7 @@
         port: '3003',
         rightKey: '',
         fliterName: '',
-      }
-    },
-    computed: {
-      filterRowList() {
-        if (!this.fliterName) {
-          return this.rawList
-        }
-        let list = []
-        let name = this.fliterName
-        this.rawList.forEach((val) => {
-          let status = val.infoList.some((v) => {
-            return v && v.value && v.value.includes(name)
-          })
-          if (status) {
-            list.push(val)
-          }
-        })
-        return list
+        
       }
     },
     mounted () {
@@ -201,11 +236,29 @@
       this.ip = getIPAdress()
     },
     methods: {
+      filter () {
+        if (!this.fliterName) {
+          this.rawList = this.json
+          return 
+        }
+        let list = []
+        let name = this.fliterName
+        this.json.forEach((val) => {
+          let status = val.infoList.some((v) => {
+            
+            return v && v.value && v.value.toString().includes(name)
+          })
+          if (status) {
+            list.push(val)
+          }
+        })
+        this.rawList = list
+      },
       showRight (time) {
         this.rightKey = time
       },
       selectTester(index) {
-        this.selectedItem = this.filterRowList[index]
+        this.selectedItem = this.rawList[index]
         if (this.selectedItem) {
           this.selectedLoggerList = []
         }
@@ -213,8 +266,8 @@
       },
       excelJsonChange (list) {
         this.rawList = [...list]
+        this.json = [...list]
       },
-      
       addLogger (event) {
         if (this.status) {
           let raw = event.data
@@ -431,7 +484,15 @@
 .list1 {
   width: 400px;
   .list-title {
+    overflow: hidden;
     background: #fafafa;
+    padding-right: 0;
+    .input-with-select {
+      width: 240px;
+    }
+    .btn:active {
+      color: rgba(48, 100, 239, 1);
+    }
     .fliter-box {
       font-size: 14px;
       margin-left: 20px;
@@ -536,4 +597,5 @@
 .pd-left20 {
   padding-left: 20px;
 }
+
 </style>
