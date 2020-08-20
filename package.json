@@ -29,7 +29,6 @@
     "element-ui": "^2.13.2",
     "express": "^4.16.4",
     "express-ws": "^4.0.0",
-    "pkginfo": "^0.4.1",
     "vue": "^2.5.16",
     "vue-electron": "^1.0.6",
     "vue-router": "^3.0.1",

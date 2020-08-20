@@ -1,9 +1,5 @@
 const path = require('path');
-const e = require('express');
-const pkginfo = require('pkginfo')(module, 'version');
-
-let versionList = pkginfo.version.split('.')
-let version = `${versionList[2]}.${versionList[0]}.${versionList[1]}`
+const version = require('../package.json').version;
 
 /**
  * `electron-packager` options
