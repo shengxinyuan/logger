@@ -1,5 +1,18 @@
 <template>
   <div>
+    <div class="option">
+      <span class="blue">文档解析模式：</span>
+      <i class="el-icon-star-on blue"></i>
+      <el-select v-model="mode" placeholder="请选择" >
+        <el-option
+          v-for="item in options"
+          :key="item.value"
+          :label="item.label"
+          :value="item.value">
+        </el-option>
+      </el-select>
+    </div>
+    
     <el-upload
       class="upload-demo"
       ref="upload"
@@ -22,7 +35,15 @@
     name: 'landing-page',
     data () {
       return {
-        fileList: []
+        fileList: [],
+        mode: 'current',
+        options: [{
+          value: 'all',
+          label: '全部版本'
+        }, {
+          value: 'current',
+          label: '当前任务版本'
+        }],
       }
     },
     methods: {
@@ -38,12 +59,15 @@
           
           workSheet['!ref'] = workSheet['!ref'].replace('A1', 'D2')
           let data = XLSX.utils.sheet_to_json(workSheet)
-          data = data.filter((val) => {
-            return val['任务版本'] === workBook.SheetNames[0]
-          })
+          if (this.mode === 'current') {
+            data = data.filter((val) => {
+              return val['任务版本'] == workBook.SheetNames[0]
+            })
+          }
           console.log(data);
           const formatDate = data.map((item) => {
             let infoList = []
+            item['event_id'] = item['event_id'] || item.eid
             Object.entries(item).forEach(([k, v]) => {
               infoList.push({
                 key: k,
@@ -51,7 +75,7 @@
               })
             })
             return {
-              name: item['事件中文名'],
+              name: item['事件中文名'] || item['事件描述'],
               status: '',
               infoList: infoList,
               raw: item
@@ -74,5 +98,13 @@
   }
   .el-upload-dragger {
     margin: 20px !important;
+  }
+  .option {
+    width: 350px;
+    display: block;
+    margin: 0 auto;
+  }
+  .blue {
+    color: rgba(48, 100, 239, 1);
   }
 </style>

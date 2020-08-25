@@ -15,14 +15,6 @@ const ip = getIPAdress();
 
 expressWs(expressApp);
 
-// 设置模板目录
-expressApp.set('views', path.join(__dirname, 'views'))
-// 设置模板引擎为 ejs
-expressApp.set('view engine', 'ejs')
-
-// 设置静态文件目录
-expressApp.use(express.static(path.join(__dirname, 'static')))
-
 expressApp.use(cookieParser());
 expressApp.use(bodyParser.urlencoded({extended: false}));
 
@@ -40,13 +32,6 @@ function getIPAdress(){
   }
 }
 
-expressApp.get('/', function (req, res) {
-  res.render('index', {
-    ip,
-    port,
-  })
-})
-
 expressApp.ws('/logger', function (ws, req) {
   clients.push(ws)
   ws.send('设备连接成功了')
@@ -55,7 +40,7 @@ expressApp.ws('/logger', function (ws, req) {
     if (/^[HxC]/.test(msg)) {
       return
     }
-    if (/[HxBI]/.test(msg) || /[event_id]/.test(msg)) {
+    if (/[event_id]/.test(msg) || /[eid]/.test(msg)) {
       clients.forEach(ws => {
         ws.send(msg)
       })

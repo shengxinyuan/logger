@@ -43,8 +43,9 @@
 
             <el-col class="list list2" v-if="selectedItem">
               <h5 class="list-title">
-                功能测试点详情
-                <el-button class="marginH20" size="mini" icon="el-icon-delete" @click="clearSelectedLoggerList"></el-button>
+                <span class="title-txt">功能测试点详情</span>
+                <el-button class="" size="mini" icon="el-icon-delete" @click="clearSelectedLoggerList"></el-button>
+                <el-button class="" size="mini" icon="el-icon-s-operation" @click="fliterSelectedLoggerList"></el-button>
               </h5>
               <el-collapse class="list2-item-box list-cont">
                 <el-collapse-item 
@@ -69,8 +70,10 @@
                       </template>
                       <div class="detail-cont">
                         <div class="detail-info" v-for="(val, index1) in item.infoList" :key="index1">
-                          <span class="detail-info-key">{{val.key}}<statusIcon v-if="selectedLogger.eventId === selectedItem.raw['event_id'] && val.status != 0" :status="val.status" />:</span>
-                          <span class="detail-info-value">{{val.value}}</span>
+                          <template v-if="dialogCheckList.length && dialogCheckList.includes(val.key)">
+                            <span class="detail-info-key">{{val.key}}<statusIcon v-if="selectedLogger.eventId === selectedItem.raw['event_id'] && val.status != 0" :status="val.status" />:</span>
+                            <span class="detail-info-value">{{val.value}}</span>
+                          </template>
                         </div>
                       </div>
                     </el-collapse-item>
@@ -101,6 +104,19 @@
         <HandleExcel @excelJsonChange="excelJsonChange"/>
       </el-tab-pane>
     </el-tabs>
+
+    <el-dialog
+      title="展示字段"
+      :visible.sync="dialogVisible"
+      :before-close="handleClose">
+      <div>
+        <p>备注：(取功能测试点详情第一条的所有字段) </p>
+        <p>(字段少请更新) =》 <el-button size="mini" @click="update">更新字段</el-button></p>
+        <el-checkbox-group v-model="dialogCheckList">
+          <el-checkbox class="check-item" :label="v" v-for="(v, i) in dialogList" :key="i"></el-checkbox>
+        </el-checkbox-group>
+      </div>
+    </el-dialog>
   </div>
 </template>
 
@@ -109,6 +125,7 @@
   import StatusSelector from './components/statusSelector'
   import StatusIcon from './components/statusIcon'
   import getIPAdress from '../utils/getIPAdress'
+  import parseUrl from '../utils/parseUrl'
 
   export default {
     components: {
@@ -228,7 +245,9 @@
         port: '3003',
         rightKey: '',
         fliterName: '',
-        
+        dialogVisible: false,
+        dialogCheckList: [],
+        dialogList: []
       }
     },
     mounted () {
@@ -272,17 +291,33 @@
         if (this.status) {
           let raw = event.data
           if (/^\[HxBI/.test(raw)) {
-            // iOS
+            // 红袖iOS
             try {
               let rawJson = raw.replace('[HxBI]: ', '')
               raw = JSON.parse(rawJson)
             } catch (error) {
               console.log('iOS', error);
             }
-          } else if (/android/.test(raw)) {
-            // android
+          } else if (/^\[QdiBI/.test(raw)) {
+            // 海外iOS
+            console.log(event);
+            try {
+              let rawJson = raw.replace('[QdiBI]: ', '')
+              raw = JSON.parse(rawJson)
+            } catch (error) {
+              console.log('iOS', error);
+            }
+          } else if (/android/.test(raw) && !/eid/.test(raw)) {
+            // 红袖android
             try {
               raw = JSON.parse(raw)
+            } catch (error) {
+              console.log('android', error);
+            }
+          } else if (/android/.test(raw) && /eid/.test(raw)) {
+            // 海外android
+            try {
+              raw = parseUrl(raw)
             } catch (error) {
               console.log('android', error);
             }
@@ -292,6 +327,7 @@
 
           if (typeof raw === 'object') {
             raw.time = +new Date()
+            raw['event_id'] = raw.event_id || raw.eid || raw.eventId
           }
 
           this.list.push(raw)
@@ -364,6 +400,30 @@
       },
       clearSelectedLoggerList () {
         this.selectedLoggerList = []
+      },
+      fliterSelectedLoggerList () {
+        if (this.dialogList.length == 0) {
+          this.update()
+        }
+        this.dialogVisible = true
+      },
+      handleClose(done) {
+        done();
+      },
+      update() {
+        if (
+          this.selectedLoggerList &&
+          this.selectedLoggerList[0] &&
+          this.selectedLoggerList[0].children &&
+          this.selectedLoggerList[0].children[0] &&
+          this.selectedLoggerList[0].children[0].raw
+        ) {
+          let raw = this.selectedLoggerList[0].children[0].raw
+          Object.entries(raw).forEach(([k, v]) => {
+            this.dialogList.push(k)
+          })
+          this.dialogCheckList = this.dialogList
+        }
       },
       webSocket () {
         this.socket = new WebSocket('ws://localhost:3003/logger')
@@ -527,6 +587,9 @@
   width: 400px;
   .list-title {
     background: #fafafa;
+    .title-txt {
+      margin-right: 20px;
+    }
   }
   .list2-item-box {
     flex: 1;
@@ -596,6 +659,9 @@
 }
 .pd-left20 {
   padding-left: 20px;
+}
+.check-item {
+  width: 120px;
 }
 
 </style>
