@@ -1,9 +1,11 @@
 <template>
   <div class="cont">
     <div v-if="show">
-      <el-button size="mini" type="success" icon="el-icon-check" circle @click="change('success')"></el-button>
-      <el-button size="mini" type="primary" icon="el-icon-edit" @click="change('')" circle></el-button>
-      <el-button size="mini" type="danger" icon="el-icon-close" circle @click="change('danger')"></el-button>
+      <div class="select-box">
+        <el-button size="mini" type="success" icon="el-icon-check" circle @click="change('success')"></el-button>
+        <el-button size="mini" type="primary" icon="el-icon-edit" @click="change('')" circle></el-button>
+        <el-button size="mini" type="danger" icon="el-icon-close" circle @click="change('danger')"></el-button>
+      </div>
     </div>
     <el-button 
       v-else 
@@ -50,15 +52,19 @@
 </script>
 
 <style scoped lang="scss">
-  .cont {
-    position: absolute;
-    left: 0;
-    display: block;
-    margin: 0 6px;
-    z-index: 2;
-    .el-button--mini.is-circle {
-      padding: 4px !important;
-    }
+.cont {
+  position: absolute;
+  left: 0;
+  display: block;
+  margin: 0 6px;
+  z-index: 2;
+  .el-button--mini.is-circle {
+    padding: 4px !important;
   }
-  
+  .select-box {
+    background: rgba(0, 0, 0, .5);
+    padding: 0 4px;
+    border-radius: 4px;
+  }
+}
 </style>
