@@ -1,7 +1,7 @@
 {
   "name": "logger",
   "productName": "logger",
-  "version": "1.0.6",
+  "version": "1.0.7",
   "author": "shengxinyuan <shengxinyuan@yuewen.com>",
   "description": "logger for hxApp",
   "license": "ISC",
