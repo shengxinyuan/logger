@@ -70,7 +70,7 @@
                       </template>
                       <div class="detail-cont">
                         <div class="detail-info" v-for="(val, index1) in item.infoList" :key="index1">
-                          <template v-if="dialogCheckList.length && dialogCheckList.includes(val.key)">
+                          <template v-if="(dialogCheckList.length && dialogCheckList.includes(val.key)) || dialogCheckList.length === 0">
                             <span class="detail-info-key">{{val.key}}<statusIcon v-if="selectedLogger.eventId === selectedItem.raw['event_id'] && val.status != 0" :status="val.status" />:</span>
                             <span class="detail-info-value">{{val.value}}</span>
                           </template>

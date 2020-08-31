@@ -40,11 +40,9 @@ expressApp.ws('/logger', function (ws, req) {
     if (/^[HxC]/.test(msg)) {
       return
     }
-    if (/[event_id]/.test(msg) || /[eid]/.test(msg)) {
-      clients.forEach(ws => {
-        ws.send(msg)
-      })
-    }
+    clients.forEach(ws => {
+      ws.send(msg)
+    })
   })
 
   ws.on('close', function (msg) {
