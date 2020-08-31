@@ -85,8 +85,8 @@
             <el-col class="list list3">
               <div class="list-title">
                 <span class="label">埋点记录</span>
-                <el-button size="mini" v-if="!status" @click="status = !status" icon="el-icon-video-play" type="primary"></el-button>
-                <el-button size="mini" v-else @click="status = !status" icon="el-icon-video-pause" type="danger"></el-button>
+                <el-button size="mini" v-if="!status" @click="status = !status" icon="el-icon-video-play" type="primary">start</el-button>
+                <el-button size="mini" v-else @click="status = !status" icon="el-icon-video-pause" type="danger">stop</el-button>
                 <el-button size="mini" @click="clearList" icon="el-icon-delete"></el-button>
                 <el-button size="mini" @click="testAdd1">+</el-button>
                 <el-button size="mini" @click="testAdd2">+</el-button>
@@ -322,6 +322,8 @@
               console.log('android', error);
             }
           } else {
+            console.log(raw);
+            this.list.push(raw)
             return 
           }
 
