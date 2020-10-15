@@ -48,7 +48,11 @@
       }
     },
     mounted () {
-      
+      this.$fetch({
+        url: '/eventTracking/api/user/list'
+      }).then((res) => {
+        console.log(12312,res);
+      })
     },
     methods: {
       
