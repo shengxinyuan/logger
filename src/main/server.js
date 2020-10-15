@@ -34,7 +34,7 @@ function getIPAdress(){
 
 expressApp.ws('/logger', function (ws, req) {
   clients.push(ws)
-  ws.send('设备连接成功了')
+  ws.send('WebSocket连接成功了')
 
   ws.on('message', function (msg) {
     if (/^[HxC]/.test(msg)) {
@@ -54,7 +54,7 @@ expressApp.ws('/logger', function (ws, req) {
   })
 
   ws.on('error', function (msg) {
-    ws.send('设备连接失败了', msg)
+    ws.send('WebSocket连接失败了', msg)
   })
 
 });
