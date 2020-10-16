@@ -7,7 +7,6 @@ export default async({
   headers = {}
 }) => {
   type = type.toUpperCase();
-  console.log(url);
   url = baseUrl + url;
 
   if (type == 'GET') {
@@ -18,12 +17,9 @@ export default async({
     })
     
     if (dataStr !== '') {
-      console.log(1111);
       dataStr = dataStr.substr(0, dataStr.lastIndexOf('&'));
       url = url + '?' + dataStr;
     }
-
-    console.log(dataStr);
   } 
 
   let requestConfig = {
