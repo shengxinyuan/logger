@@ -1,7 +1,9 @@
 <template>
-  <div class="logList">
+  <div class="testList">
     <PageHeader title="测试用例列表"/>
-    <el-button type="primary" size="small" class="log-btn" @click="onCreate">创建计划</el-button>
+    <div class="list-header">
+      <el-button type="primary" size="small" class="log-btn" @click="handelModal">创建计划</el-button>
+    </div>
       <div
         class="table-con"
       >
@@ -20,11 +22,16 @@
             <template slot-scope="scope">
               <el-button
                 size="mini"
+                type="text"
                 @click="handleEdit(scope.$index, scope.row)">编辑</el-button>
               <el-button
                 size="mini"
-                type="danger"
+                type="text"
                 @click="handleDelete(scope.$index, scope.row)">删除</el-button>
+              <el-button
+                size="mini"
+                type="text"
+                @click="goLoglist(scope.$index, scope.row)">开始测试</el-button>
             </template>
         </el-table-column>
         </el-table>
@@ -38,17 +45,16 @@
         center
         class="dialog-con"
       >
-        <el-form :model="modifyData" ref="modifyForm" style="padding-right: 26px;">
+        <el-form :model="testModel" ref="modifyForm" style="padding-right: 26px;">
           <el-form-item label="名称：" label-width="100px" prop="categoryName">
-            <el-input v-model="modifyData.name" auto-complete="off"></el-input>
+            <el-input v-model="testModel.planName" auto-complete="off"></el-input>
           </el-form-item>
           <el-form-item label="版本：" label-width="100px" prop="categoryLevel">
-            <el-input v-model="modifyData.version" auto-complete="off"></el-input>
+            <el-input v-model="testModel.versionId" auto-complete="off"></el-input>
           </el-form-item>
           <el-form-item label="平台：" label-width="100px" >
-            <el-select v-model="modifyData.version" placeholder="请选择平台" auto-complete="off">
-              <el-option label="红袖" value="honhxiu"></el-option>
-              <el-option label="海外" value="haiwai"></el-option>
+            <el-select v-model="testModel.platform" placeholder="请选择平台" auto-complete="off">
+              <el-option v-for="d in platformList" :key="d.id" :value="d.name">{{d.name}}</el-option>
             </el-select>
           </el-form-item>
           <el-form-item style="text-align: center">
@@ -107,6 +113,16 @@
           version: '',
           platform: ''
         },
+        platformList: [
+          {
+            id: 1,
+            name: '红袖',
+          },
+          {
+            id: 2,
+            name: '海外',
+          }
+        ],
         modifyFormVisible: false,
         testList: [], // 测试计划列表
         testModel: {
@@ -127,21 +143,42 @@
       })
     },
     methods: {
-      onCreate() {
+      handelModal() {
         this.modifyFormVisible = this.modifyFormVisible ? false : true
+      },
+
+      /*
+      * 编辑用例
+      */
+      handleEdit() {
+        this.handelModal()
+      },
+
+      /*
+      * 删除用例
+      */
+      handleDelete() {
+
+      },
+
+      goLoglist() {
+        this.$router.push('/logger')
       },
       /*
       * 保存创建
       */
       save() {
+        console.log(this.testModel);
         console.log('哇哦，保存成功了');
+        this.handelModal()
+        this.$router.push('/logList')
       },
 
       /*
       * 取消创建
       */
       cancel() {
-        this.testPlan = {}
+        this.testModel = {}
         this.modifyFormVisible = this.modifyFormVisible ? false : true
       }
     }
@@ -149,8 +186,18 @@
 </script>
 
 <style lang="scss" scoped>
-  .logList {
+  .testList {
     background: #f8f8f9
+  }
+  .list-header {
+    height: 54px;
+    margin-left: 16px;
+    margin-right: 16px;
+    border-bottom: 1px solid rgba(153, 153, 153, 0.28);
+    display: flex;
+    flex-direction: row;
+    justify-content: flex-end;
+    align-items: center;
   }
   .table-con {
     margin: 16px;
