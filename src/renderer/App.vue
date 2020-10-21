@@ -11,25 +11,13 @@
         </div>
       </el-popover>
 
-      <router-link to="/user">
-        <img class="icon-item" src="./assets/user.png" alt="">
+      <router-link :to="v.path" v-for="(v) in list" :key="v.path" class="route-list-item">
+        <div class="icon-box" :class="path == v.path ? 'active':''">
+          <img class="icon-item"  :src="v.icon">
+          <div class="icon-label">{{v.txt}}</div>
+        </div>
       </router-link>
-      <router-link to="/document">
-        <img class="icon-item" src="./assets/order.png" alt="">
-      </router-link>
-      <router-link to="/excel">
-        <img class="icon-item" src="./assets/order.png" alt="">
-      </router-link>
-      <router-link to="/testList">
-        <img class="icon-item" src="./assets/list.png" alt="">
-      </router-link>
-      <router-link to="/logList">
-        <img class="icon-item" src="./assets/list.png" alt="">
-      </router-link>
-      <router-link to="/logger">
-        <img class="icon-item" src="./assets/list.png" alt="">
-      </router-link>
-      
+
     </div>
     <router-view class="main-cont"/>
   </div>
@@ -44,19 +32,53 @@
     },
     data() {
       return {
-        
+        path: '',
+        list: [
+          {
+            path: '/user',
+            txt: '个人',
+            icon: require('./assets/user.png')
+          },
+          {
+            path: '/testList',
+            txt: '用例',
+            icon: require('./assets/testList.png')
+          },
+          {
+            path: '/logList',
+            txt: '埋点',
+            icon: require('./assets/logList.png')
+          },
+          {
+            path: '/logger',
+            txt: '测试',
+            icon: require('./assets/logger.png')
+          }
+        ]
       }
     },
-    mounted () {
+    mounted() {
       this.$fetch({
         url: '/eventTracking/api/user/list'
       }).then((res) => {
         console.log(12312,res);
       })
+      try {
+        this.$router.push('/logger')
+      } catch (error) {
+        this.path = '/logger'
+      }
+      
     },
     methods: {
       
     },
+    watch: {
+      '$route.path' (newVal, oldVal) {
+        this.path = newVal
+        console.log(newVal);
+      }
+    }
   }
 </script>
 
@@ -65,6 +87,9 @@
 .app {
   height: 100vh;
   display: flex;
+  .route-list-item {
+    text-decoration: none !important;
+  }
   .side-bar {
     position: fixed;
     top: 0;
@@ -77,12 +102,27 @@
     .logo {
       display: block;
       width: 40px;
-      margin: 20px auto 40px auto;
+      margin: 20px auto 30px auto;
+    }
+    .active {
+      background: $color2;
+    }
+    .icon-box {
+      padding: 8px 0;
+      margin: 12px 0;
     }
     .icon-item {
+      margin: 0 auto;
       display: block;
-      width: 32px;
-      margin: 20px auto;
+      width: 24px;
+    }
+    .icon-label {
+      margin-top: 6px;
+      width: 100%;
+      color: #fff;
+      text-align: center;
+      font-size: 12px;
+      text-decoration: none !important;
     }
   }
   .main-cont {

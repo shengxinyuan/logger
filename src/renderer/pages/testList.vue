@@ -1,15 +1,11 @@
 <template>
   <div class="logList">
-    <div class="header">
-      <span>测试计划列表</span>
-      <el-button type="primary" size="small" class="log-btn" @click="onCreate">创建计划</el-button>
-    </div>
+    <PageHeader title="测试用例列表"/>
+    <el-button type="primary" size="small" class="log-btn" @click="onCreate">创建计划</el-button>
       <div
         class="table-con"
-        border
-        stripe
       >
-        <el-table :data="testList" class="table">
+        <el-table :data="testList" class="table" stripe border>
           <el-table-column prop="name" label="计划名称" width="100"></el-table-column>
           <el-table-column prop="version" label="版本"  width="80"></el-table-column>
           <el-table-column prop="platform" label="平台" width="80"></el-table-column>
@@ -65,9 +61,10 @@
 </template>
 
 <script>
+  import PageHeader from '../components/pageHeader'
   export default {
     components: {
-
+      PageHeader
     },
     data() {
       return {
@@ -155,23 +152,8 @@
   .logList {
     background: #f8f8f9
   }
-  .header {
-    height: 44px;
-    background-color: #fff;
-    padding-horizontal: 16px;
-    padding-left: 16px;
-    padding-right: 16px;
-    display: flex;
-    flex-direction: row;
-    justify-content: space-between;
-    align-items: center;
-    box-shadow: 0px 0px 5px -1px #f8f8f9;
-    border-bottom:1px solid #eeeef2;
-  }
   .table-con {
     margin: 16px;
-    border:1px solid #eeeef2;
-    // border-radius: 8px;
   }
   .table {
     width: 100%;

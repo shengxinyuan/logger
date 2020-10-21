@@ -488,8 +488,8 @@
   height: 100vh;
 }
 .log-header {
-  background: rgba(48, 100, 239, 1);
-  color: #fff;
+  background: #fafafa;
+  color: rgba(48, 100, 239, 1);
   font-size: 24px;
   padding: 6px 16px;
   .net-status {

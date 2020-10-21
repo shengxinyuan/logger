@@ -12,7 +12,7 @@ Vue.use(Router)
 export default new Router({
   routes: [
     {
-      path: '/',
+      path: '/logger',
       name: 'logger',
       component: Logger
     },
@@ -43,7 +43,7 @@ export default new Router({
     },
     {
       path: '*',
-      redirect: '/'
+      redirect: '/logger'
     }
   ]
 })

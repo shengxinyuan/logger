@@ -1,53 +1,59 @@
 <template>
   <div class="logList">
-    <el-header class="header">待测埋点列表</el-header>
-    <el-table
-      :data="list"
-      class="logList-table"
-      border
-      stripe
-    >
-      <el-table-column
-        type="selection">
-      </el-table-column>
-      <el-table-column
-        prop="date"
-        label="版本">
-      </el-table-column>
-      <el-table-column
-        prop="name"
-        label="页面">
-      </el-table-column>
-      <el-table-column
-        prop="name"
-        label="测试人员">
-      </el-table-column>
-      <el-table-column
-        prop="address"
-        label="开发人员">
-      </el-table-column>
-      <el-table-column
-        prop="event_id"
-        label="开发人员">
-      </el-table-column>
-      <el-table-column
-        prop="plantfrom"
-        label="平台">
-      </el-table-column>
-    </el-table>
-    <div class="bottom-box">
-      <el-button type="primary">开始测试</el-button>
+    <PageHeader title="待测埋点列表" :tip="!mode ? '（请选择埋点开始测试）' : ''"/>
+    <div class="table-con">
+      <el-table
+        :data="list"
+        class="logList-table"
+        border
+        stripe
+      >
+        <el-table-column
+          type="selection">
+        </el-table-column>
+        <el-table-column
+          prop="date"
+          label="版本">
+        </el-table-column>
+        <el-table-column
+          prop="name"
+          label="页面">
+        </el-table-column>
+        <el-table-column
+          prop="name"
+          label="测试人员">
+        </el-table-column>
+        <el-table-column
+          prop="address"
+          label="开发人员">
+        </el-table-column>
+        <el-table-column
+          prop="event_id"
+          label="开发人员">
+        </el-table-column>
+        <el-table-column
+          prop="plantfrom"
+          label="平台">
+        </el-table-column>
+      </el-table>
+    </div>
+    
+    <div>
+      <el-button type="primary" class="conform-btn" @click="btnClick">{{ mode === 'test' ? '确定' : '开始测试'}}</el-button>
+      
     </div>
   </div>
 </template>
 
 <script>
+  import PageHeader from '../components/pageHeader'
   export default {
     components: {
-
+      PageHeader
     },
     data() {
       return {
+        mode: '', //如有testId，就是测试用例的选择 test
         pointList: [],
         list: [{
             date: '2016-05-02',
@@ -68,7 +74,13 @@
           }]
       }
     },
-    mounted () {
+    created() {
+      if (this.$route.query.testId) {
+        this.mode = 'test'
+      }
+    },
+    mounted() {
+      console.log(this.$route.query.testId);
       this.$fetch({
         url: '/eventTracking/api/eventPoint/list'
       }).then((res) => {
@@ -80,31 +92,38 @@
       console.log(this.$store.state.logList.loggerAllList);
     },
     methods: {
+      btnClick() {
+        if (this.mode === 'test') {
+          this.goTesterPage()
+        } else {
+          this.goLoggerPage()
+        }
+      },
       goLoggerPage() {
-
+        this.$router.push('/logger')
       },
       goTesterPage() {
-
+        this.$router.push('/testList')
       }
     }
   }
 </script>
 
 <style lang="scss" scoped>
+@import '../styles/var.scss';
 .logList {
   height: 100vh;
-  font-family: Helvetica Neue,Helvetica,PingFang SC,Hiragino Sans GB,Microsoft YaHei,SimSun,sans-serif;;
+  background: #f8f8f9
 }
-.header {
-  display: flex;
-  align-items: center;
+.table-con {
+  margin: 16px;
+  .logList-table {
+    height: 80vh;
+    width: 100%;
+  }
 }
-.logList-table {
-  height: 80vh;
-  margin: 20px;
-}
-.bottom-box {
-  height: 10vh;
-  float: right;
+
+.conform-btn {
+  margin: 0 16px;
 }
 </style>
