@@ -13,15 +13,18 @@
         </el-table-column>
         <el-table-column
           prop="date"
-          label="版本">
+          label="版本"
+          width="100">
         </el-table-column>
         <el-table-column
           prop="name"
-          label="页面">
+          label="页面"
+          width="100">
         </el-table-column>
         <el-table-column
           prop="name"
-          label="测试人员">
+          label="测试人员"
+          width="100">
         </el-table-column>
         <el-table-column
           prop="address"
@@ -29,11 +32,13 @@
         </el-table-column>
         <el-table-column
           prop="event_id"
-          label="开发人员">
+          label="开发人员"
+          width="100">
         </el-table-column>
         <el-table-column
           prop="plantfrom"
-          label="平台">
+          label="平台"
+          width="100">
         </el-table-column>
       </el-table>
     </div>
@@ -122,7 +127,6 @@
     width: 100%;
   }
 }
-
 .conform-btn {
   margin: 0 16px;
 }

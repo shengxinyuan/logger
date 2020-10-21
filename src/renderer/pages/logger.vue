@@ -1,11 +1,6 @@
 <template>
   <div class="logger">
-    <div class="log-header">
-      <span class="title">Logger</span>
-      状态： <span class="net-status">{{ intStatus }}</span>
-       <span class="net-status"> [--ip：{{ ip }}</span>
-      <span class="net-status">--port：{{ port }}]</span>
-    </div>
+    <PageHeader title="埋点测试 " :tip="` （${intStatus}  ip：${ip} port：${port}）`"/>
     <el-tabs v-model="activeName" class="tab">
       <el-tab-pane label="logger记录" name="record">
         <div class="table">
@@ -121,6 +116,7 @@
 </template>
 
 <script>
+  import PageHeader from '../components/pageHeader'
   import HandleExcel from '../components/handleExcel'
   import StatusSelector from '../components/statusSelector'
   import StatusIcon from '../components/statusIcon'
@@ -129,6 +125,7 @@
 
   export default {
     components: {
+      PageHeader,
       HandleExcel,
       StatusSelector,
       StatusIcon
@@ -530,7 +527,7 @@
 }
 
 .list {
-  height: calc(100vh - 115px);
+  height: calc(100vh - 150px);
   border: 1px solid #E4E7ED;
   border-radius: 4px;
   background: #fafafa;

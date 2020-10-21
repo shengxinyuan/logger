@@ -28,7 +28,6 @@
   flex-direction: row;
   align-items: center;
   box-shadow: 0px 0px 5px -1px #999;
-  border-bottom: 1px solid #eeeef2;
   h1 {
     font-size: 20px;
     font-weight: normal;
