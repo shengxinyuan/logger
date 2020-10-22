@@ -5,7 +5,7 @@
         <i class="el-icon-setting user-icon"></i>
         <el-dropdown @command="handleCommand">
           <span style="margin-left: 4px">
-            {{userInfo.name}}
+            {{userInfo.userName}}
             <i class="el-icon-caret-bottom el-icon--right"></i>
           </span>
           <el-dropdown-menu slot="dropdown">
@@ -18,29 +18,28 @@
       <div class="aside">
         <div class="aside-con">
           <img v-if="imageUrl" :src="imageUrl" class="avatar">
-          <span style="display: block">{{userInfo.name}}</span>
+          <span style="display: block">{{userInfo.userName}}</span>
         </div>
       </div>
       <div class="form">
         <el-form ref="form" :model="userInfo" label-width="80px">
-          <el-form-item label="用户邮箱">
-            <el-input v-model="userInfo.email"></el-input>
+          <el-form-item label="用户邮箱:">
+            <el-input v-model="userInfo.ywaccount" :disabled="true"></el-input>
           </el-form-item>
-          <el-form-item label="用户昵称">
-            <el-input v-model="userInfo.name"></el-input>
+          <el-form-item label="用户昵称:">
+            <el-input v-model="userInfo.userName" :disabled="true"></el-input>
           </el-form-item>
-          <el-form-item label="平台">
-            <el-select v-model="userInfo.region" placeholder="请选择平台">
-              <el-option label="红袖" value="honhxiu"></el-option>
-              <el-option label="海外" value="haiwai"></el-option>
+          <el-form-item label="角色:">
+            <el-input v-model="userInfo.roleName" :disabled="true"></el-input>
+          </el-form-item>
+          <el-form-item label="项目组:">
+            <el-select v-model="userInfo.groupName" placeholder="请选择平台" @change="save" style="width: 220px">
+              <el-option
+                v-for="(item, key) in groupList"
+                :key="key"
+                :value="item.groupName">
+              </el-option>
             </el-select>
-          </el-form-item>
-          <el-form-item label="描述">
-            <el-input type="textarea" v-model="userInfo.desc"></el-input>
-          </el-form-item>
-          <el-form-item>
-            <el-button type="primary" @click="save">保存设置</el-button>
-            <el-button @click="cancel">取消</el-button>
           </el-form-item>
         </el-form>
       </div>
@@ -59,28 +58,68 @@
       return {
         imageUrl: 'https://readx-her-1252317822.picsh.myqcloud.com/boss/test/background/123/user_1602904082_7030.png',
         userInfo: {
-          name: '王涵',
-          email: 'wanghan.c@yuewen.com',
-          region: '',
-          date1: '',
-          date2: '',
-          delivery: false,
-          type: [],
-          resource: '',
-          desc: '',
-        }
+          userName: '',
+          ywaccount: '',
+          p_account: '',
+          roleId: '',
+          roleName: '',
+        },
+        groupList: []
       }
     },
+
     mounted () {
-
+      this.getInfo()
     },
-    methods: {
-      save() {
 
+    methods: {
+      getInfo() {
+        var p1 = new Promise((resolve, reject) => {
+          this.$fetch({
+            url: '/eventTracking/api/user/info'
+          }).then((res) => {
+            if (res.code == '0') {
+              this.userInfo = Object.assign(this.userInfo, res.data);
+            }
+          })
+        });
+
+        var p2 = new Promise((resolve,reject)=>{
+          this.$fetch({
+            url: '/eventTracking/api/group/list'
+          }).then((res) => {
+            if (res.code == '0') {
+              this.groupList = Object.assign(this.groupList, res.data.list);
+            }
+          })
+        })
+
+        Promise.all([p1,p2]).then(res=>{
+            console.log(res);
+        })
       },
-      cancel() {
-        this.userInfo = {}
+
+      save() {
+        var index = this.groupList.findIndex((item) => {
+          if (item.groupName == this.userInfo.groupName) {
+            return true
+          }
+        })
+
+        if (index !== -1) {
+          var groupId = this.groupList[index].groupId
+          this.$store.commit('common_setGroupId', groupId)
+          localStorage.setItem('groupId', groupId);
+        }
+
+        this.$message({
+          showClose: true,
+          message:  `已更新到${this.userInfo.groupName}组`,
+          type: 'success',
+          center: true
+        });
       },
+
       handleCommand(command) {
         console.log('退出登录了宁～～～～')
       }
@@ -130,7 +169,7 @@
   .form {
     display: inline-block;
     margin: 16px;
-    width: 500px;
+    width: 300px;
     position: absolute;
     left: 50%;
     top: 50%;
