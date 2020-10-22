@@ -1,6 +1,19 @@
 <template>
   <div class="user">
-    <PageHeader title="个人中心"/>
+    <PageHeader title="个人中心">
+      <div class="el-dropdown-link dropdown-title">
+        <i class="el-icon-setting user-icon"></i>
+        <el-dropdown @command="handleCommand">
+          <span style="margin-left: 4px">
+            {{userInfo.name}}
+            <i class="el-icon-caret-bottom el-icon--right"></i>
+          </span>
+          <el-dropdown-menu slot="dropdown">
+            <el-dropdown-item command="logOut">退出登录</el-dropdown-item>
+          </el-dropdown-menu>
+        </el-dropdown>
+      </div>
+    </PageHeader>
     <div style="margin-left: 16px">
       <div class="aside">
         <div class="aside-con">
@@ -67,6 +80,9 @@
       },
       cancel() {
         this.userInfo = {}
+      },
+      handleCommand(command) {
+        console.log('退出登录了宁～～～～')
       }
     }
   }
@@ -80,6 +96,16 @@
     box-shadow: 0px 0px 5px -1px #f8f8f9;
     position: relative;
   }
+  .dropdown-title {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+  }
+
+  .el-dropdown-link {
+    cursor: pointer;
+  }
+
   .log-btn {
     height: 30px;
   }

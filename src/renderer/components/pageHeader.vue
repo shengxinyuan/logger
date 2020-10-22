@@ -1,7 +1,12 @@
 <template>
   <div class="header">
-    <h1 class="title">{{title}}</h1>
-    <p class="header-tip">{{tip}}</p>
+    <div class="header-left">
+      <h1 class="title">{{title}}</h1>
+      <p class="header-tip">{{tip}}</p>
+    </div>
+    <div class="header-right">
+      <slot></slot>
+    </div>
   </div>
 </template>
 
@@ -14,7 +19,7 @@
         show: false
       }
     },
-    
+
   }
 </script>
 
@@ -26,8 +31,15 @@
   padding: 0 20px;
   display: flex;
   flex-direction: row;
+  justify-content: space-between;
   align-items: center;
   box-shadow: 0px 0px 5px -1px #999;
+}
+
+.header-left {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
   h1 {
     font-size: 20px;
     font-weight: normal;
@@ -38,4 +50,9 @@
   }
 }
 
+.header-right {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+}
 </style>
