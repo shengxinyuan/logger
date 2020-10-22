@@ -58,6 +58,7 @@
         path: '',
         dialogVisible: false,
         ywaccount: '',
+        groupId: '',
         list: [
           {
             path: '/user',
@@ -87,16 +88,15 @@
         ]
       }
     },
-    mounted() {
-      this.$fetch({
-        url: '/eventTracking/api/user/info'
-      }).then((res) => {
-        if (res.code === 0) {
-          const userInfo = localStorage.getItem('userInfo');
-        } else if (res.code === -100) {
-          this.dialogVisible = true
-        }
-      })
+    created() {
+      const ywaccount = localStorage.getItem('ywaccount');
+      this.groupId = localStorage.getItem('groupId');
+      if (!ywaccount) {
+        this.dialogVisible = true
+      } else {
+        this.ywaccount = ywaccount
+        this.login()
+      }
       this.$router.push('/logger')
     },
     methods: {
@@ -114,11 +114,21 @@
               message: '登录成功',
               type: 'success'
             })
+            localStorage.setItem('ywaccount', this.ywaccount);
             this.$fetch({
-        url: '/eventTracking/api/user/list'
-      }).then((res) => {
-        console.log(12312,res);
-      })
+              url: '/eventTracking/api/user/info'
+            }).then((res) => {
+              if (res.code === 0) {
+                this.$store.commit('common_setUserInfo', {
+                  ...res.data
+                })
+                if (!this.groupId) {
+                  this.groupId = res.data.groupInfo[0].groupId
+                  this.$store.commit('common_setGroupId', this.groupId)
+                  localStorage.setItem('groupId', this.groupId);
+                }
+              } 
+            })
           } else {
             this.$message({
               message: res.msg,
