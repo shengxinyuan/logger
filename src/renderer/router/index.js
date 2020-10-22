@@ -7,6 +7,10 @@ import User from '../pages/user'
 import LogList from '../pages/logList'
 import TestList from '../pages/testList'
 
+const originalPush = Router.prototype.push
+Router.prototype.push = function push(location) {
+  return originalPush.call(this, location).catch(err => err)
+}
 Vue.use(Router)
 
 export default new Router({

@@ -95,9 +95,6 @@
           </div>
         </div>
       </el-tab-pane>
-      <el-tab-pane label="上传埋点文件" name="json">
-        <HandleExcel @excelJsonChange="excelJsonChange"/>
-      </el-tab-pane>
     </el-tabs>
 
     <el-dialog
@@ -117,7 +114,6 @@
 
 <script>
   import PageHeader from '../components/pageHeader'
-  import HandleExcel from '../components/handleExcel'
   import StatusSelector from '../components/statusSelector'
   import StatusIcon from '../components/statusIcon'
   import getIPAdress from '../../utils/getIPAdress'
@@ -126,7 +122,6 @@
   export default {
     components: {
       PageHeader,
-      HandleExcel,
       StatusSelector,
       StatusIcon
     },
@@ -279,10 +274,6 @@
           this.selectedLoggerList = []
         }
         this.rightKey = ''
-      },
-      excelJsonChange (list) {
-        this.rawList = [...list]
-        this.json = [...list]
       },
       addLogger (event) {
         if (this.status) {

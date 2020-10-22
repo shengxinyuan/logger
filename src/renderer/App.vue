@@ -19,20 +19,45 @@
       </router-link>
 
     </div>
-    <router-view class="main-cont"/>
+    <keep-alive>
+      <router-view class="main-cont"/>
+    </keep-alive>
+
+    <el-dialog
+      title="登录"
+      :modal-append-to-body="false"
+      :visible.sync="dialogVisible"
+      width="400px"
+      center
+      class="dialog-con"
+      :close-on-click-modal="false"
+      :close-on-press-escape="false"
+      :show-close="false"
+    >
+      <el-form>
+        <el-form-item label="邮箱：" label-width="60px" prop="categoryName">
+          <el-input
+            v-model="ywaccount"
+            placeholder="请输入阅文邮箱"
+          ></el-input>
+        </el-form-item>
+        <el-form-item style="text-align: right">
+          <el-button type="primary" @click="login">确定</el-button>
+        </el-form-item>
+      </el-form>
+    </el-dialog>
   </div>
 </template>
 
 <script>
-  import HandleExcel from './components/handleExcel'
-
   export default {
     components: {
-      HandleExcel,
     },
     data() {
       return {
         path: '',
+        dialogVisible: false,
+        ywaccount: '',
         list: [
           {
             path: '/user',
@@ -50,33 +75,62 @@
             icon: require('./assets/logList.png')
           },
           {
+            path: '/excel',
+            txt: '上传',
+            icon: require('./assets/excel.png')
+          },
+          {
             path: '/logger',
             txt: '测试',
             icon: require('./assets/logger.png')
-          }
+          },
         ]
       }
     },
     mounted() {
       this.$fetch({
+        url: '/eventTracking/api/user/info'
+      }).then((res) => {
+        if (res.code === 0) {
+          const userInfo = localStorage.getItem('userInfo');
+        } else if (res.code === -100) {
+          this.dialogVisible = true
+        }
+      })
+      this.$router.push('/logger')
+    },
+    methods: {
+      login() {
+        this.$fetch({
+          url: '/eventTracking/api/login',
+          type: 'post',
+          data: {
+            ywaccount: this.ywaccount.replace('@yuewen.com', '')
+          }
+        }).then((res) => {
+          if (res.code === 0) {
+            this.dialogVisible = false
+            this.$message({
+              message: '登录成功',
+              type: 'success'
+            })
+            this.$fetch({
         url: '/eventTracking/api/user/list'
       }).then((res) => {
         console.log(12312,res);
       })
-      try {
-        this.$router.push('/logger')
-      } catch (error) {
-        this.path = '/logger'
+          } else {
+            this.$message({
+              message: res.msg,
+              type: 'error'
+            })
+          }
+        })
       }
-      
-    },
-    methods: {
-      
     },
     watch: {
       '$route.path' (newVal, oldVal) {
         this.path = newVal
-        console.log(newVal);
       }
     }
   }

@@ -2,11 +2,14 @@
   <div class="logList">
     <PageHeader title="待测埋点列表" :tip="!mode ? '（请选择埋点开始测试）' : ''"/>
     <div class="table-con">
+      <el-button @click="clearFilter">清除所有过滤器</el-button>
       <el-table
+        ref="logListTable"
         :data="list"
         class="logList-table"
         border
         stripe
+        @selection-change="handleSelectionChange"
       >
         <el-table-column
           type="selection">
@@ -14,7 +17,10 @@
         <el-table-column
           prop="date"
           label="版本"
-          width="100">
+          width="100"
+          :filters="[{text: '2016-05-01', value: '2016-05-01'}, {text: '2016-05-02', value: '2016-05-02'}, {text: '2016-05-03', value: '2016-05-03'}, {text: '2016-05-04', value: '2016-05-04'}]"
+          :filter-method="filterHandler1"
+        >
         </el-table-column>
         <el-table-column
           prop="name"
@@ -45,7 +51,6 @@
     
     <div>
       <el-button type="primary" class="conform-btn" @click="btnClick">{{ mode === 'test' ? '确定' : '开始测试'}}</el-button>
-      
     </div>
   </div>
 </template>
@@ -76,7 +81,8 @@
             date: '2016-05-03',
             name: '王小虎',
             address: '上海市普陀区金沙江路 1516 弄'
-          }]
+          }],
+          multipleSelection: []
       }
     },
     created() {
@@ -109,6 +115,16 @@
       },
       goTesterPage() {
         this.$router.push('/testList')
+      },
+      clearFilter() {
+        this.$refs.logListTable.clearFilter();
+      },
+      filterHandler1() {
+        
+      },
+      handleSelectionChange(val) {
+        this.multipleSelection = val
+        console.log(val);
       }
     }
   }
