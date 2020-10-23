@@ -10,14 +10,18 @@
         <el-table :data="testList" class="table" stripe border>
           <el-table-column prop="name" label="计划名称" width="130"></el-table-column>
           <el-table-column prop="version" label="版本"  width="80"></el-table-column>
-          <el-table-column prop="platform" label="平台" width="80"></el-table-column>
+          <el-table-column label="平台" width="80">
+            <template slot-scope="scope">
+              <span>{{platform(scope.row.platform)}}</span>
+            </template>
+          </el-table-column>
           <el-table-column label="状态" width="80">
             <template slot-scope="scope">
               <span>{{scope.row.status == '0' ? '已开始' : '未开始'}}</span>
             </template>
           </el-table-column>
-          <el-table-column prop="creator" label="创建人" width="120"></el-table-column>
-          <el-table-column prop="time" label="创建时间" width="120"></el-table-column>
+          <el-table-column prop="operator" label="创建人" width="120"></el-table-column>
+          <el-table-column prop="createTime" label="创建时间" width="120"></el-table-column>
           <el-table-column label="操作">
             <template slot-scope="scope">
               <el-button
@@ -103,7 +107,7 @@
           }
         ],
         modifyFormVisible: false,
-        testList: [], // 测试计划列表
+        testListInfo: [], // 测试计划列表
         testModel: {
           planName: '',
           versionId: '',
@@ -118,11 +122,20 @@
     mounted () {
       this.groupId = this.$store.state.common.groupId
 
-      this.loadData()
+      Promise.all([this.loadTestPlanData(), this.loadVersionData()]).then(res=>{
+        console.log(res);
+      })
     },
+
+    computed: {
+      testList() {
+        return this.testListInfo
+      }
+    },
+
     methods: {
-      loadData() {
-        var p1 = new Promise((resolve, reject) => {
+      loadTestPlanData() {
+        return new Promise((resolve, reject) => {
           this.$fetch({
             url: '/eventTracking/api/testPlan/list',
             data: {
@@ -130,12 +143,14 @@
             }
           }).then((res) => {
             if (res.code === 0) {
-              this.testList = res.data.list
+              this.testListInfo = res.data.list
             }
           })
         });
+      },
 
-        var p2 = new Promise((resolve,reject)=>{
+      loadVersionData() {
+        return new Promise((resolve,reject)=>{
           this.$fetch({
             url: '/eventTracking/api/version/list',
             data: {
@@ -143,16 +158,25 @@
             }
           }).then((res) => {
             if (res.code == '0') {
-              this.versionList = Object.assign(this.versionList, res.data.versionList);
+              this.versionList = res.data.versionList;
             }
           })
         })
-
-        Promise.all([p1,p2]).then(res=>{
-            console.log(res);
-        })
       },
+
+      platform(platformId) {
+        var index = this.platformList.findIndex((e) => {
+          if (e.id === platformId) return true
+        })
+
+        if (index != -1) {
+          return this.platformList[index].name
+        }
+        return '未知平台'
+      },
+
       handelModal() {
+        this.testModel = {}
         this.modifyFormVisible = this.modifyFormVisible ? false : true
       },
 
@@ -166,8 +190,37 @@
       /*
       * 删除用例
       */
-      handleDelete() {
-
+      handleDelete(index, testPlan) {
+        console.log(testPlan)
+        const model = Object.assign(testPlan, {status: -1})
+        this.$confirm('删除后不可恢复哦～, 是否继续?', '删除', {
+          confirmButtonText: '确定',
+          cancelButtonText: '取消',
+          type: 'warning'
+        }).then(() => {
+          this.$fetch({
+            url: '/eventTracking/api/testPlan/update',
+            type: 'POST',
+            data: model
+          }).then((res) => {
+            if (res.code === 0) {
+              this.$message({
+                showClose: true,
+                message:  `删除成功`,
+                type: 'success',
+                center: true
+              });
+              this.loadTestPlanData()
+            }
+          }).catch((err) => {
+            this.$message.error(err.msg || '删除失败啦，请重试哇');
+          })
+        }).catch(() => {
+          this.$message({
+            type: 'info',
+            message: '已取消删除'
+          });
+        });
       },
 
       goLoglist(index, testPlan) {
@@ -186,7 +239,6 @@
           data: this.testModel
         }).then((res) => {
           if (res.code == '0') {
-            console.log('哇哦，保存成功了');
             this.handelModal()
             this.$router.push('/logList')
           }
