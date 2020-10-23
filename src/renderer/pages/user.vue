@@ -33,11 +33,12 @@
             <el-input v-model="userInfo.roleName" :disabled="true"></el-input>
           </el-form-item>
           <el-form-item label="项目组:">
-            <el-select v-model="userInfo.groupName" placeholder="请选择平台" @change="save" style="width: 220px">
+            <el-select v-model="groupId" placeholder="请选择平台" @change="save" style="width: 220px">
               <el-option
-                v-for="(item, key) in groupList"
+                v-for="(item, key) in userInfo.groupInfo"
                 :key="key"
-                :value="item.groupName">
+                :label="item.groupName"
+                :value="item.groupId">
               </el-option>
             </el-select>
           </el-form-item>
@@ -63,53 +64,38 @@
           p_account: '',
           roleId: '',
           roleName: '',
+          groupInfo: []
         },
-        groupList: []
+        groupId: null,
       }
     },
 
     mounted () {
-      this.getInfo()
+      this.groupId = this.$store.state.common.groupId
+      this.loadData()
     },
 
     methods: {
-      getInfo() {
-        var p1 = new Promise((resolve, reject) => {
-          this.$fetch({
-            url: '/eventTracking/api/user/info'
-          }).then((res) => {
-            if (res.code == '0') {
-              this.userInfo = Object.assign(this.userInfo, res.data);
-            }
-          })
-        });
-
-        var p2 = new Promise((resolve,reject)=>{
-          this.$fetch({
-            url: '/eventTracking/api/group/list'
-          }).then((res) => {
-            if (res.code == '0') {
-              this.groupList = Object.assign(this.groupList, res.data.list);
-            }
-          })
-        })
-
-        Promise.all([p1,p2]).then(res=>{
-            console.log(res);
+      loadData() {
+        this.$fetch({
+          url: '/eventTracking/api/user/info'
+        }).then((res) => {
+          if (res.code == '0') {
+            this.userInfo = Object.assign(this.userInfo, res.data);
+          }
         })
       },
 
       save() {
-        var index = this.groupList.findIndex((item) => {
-          if (item.groupName == this.userInfo.groupName) {
+        var index = this.userInfo.groupList.findIndex((item) => {
+          if (item.groupId == this.groupId) {
             return true
           }
         })
 
         if (index !== -1) {
-          var groupId = this.groupList[index].groupId
-          this.$store.commit('common_setGroupId', groupId)
-          localStorage.setItem('groupId', groupId);
+          this.$store.commit('common_setGroupId', this.groupId)
+          localStorage.setItem('groupId', this.groupId);
         }
 
         this.$message({

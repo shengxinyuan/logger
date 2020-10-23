@@ -8,12 +8,12 @@
         class="table-con"
       >
         <el-table :data="testList" class="table" stripe border>
-          <el-table-column prop="name" label="计划名称" width="100"></el-table-column>
+          <el-table-column prop="name" label="计划名称" width="130"></el-table-column>
           <el-table-column prop="version" label="版本"  width="80"></el-table-column>
           <el-table-column prop="platform" label="平台" width="80"></el-table-column>
           <el-table-column label="状态" width="80">
             <template slot-scope="scope">
-              <span>{{scope.row.status == '0' ? '开启' : '未开启'}}</span>
+              <span>{{scope.row.status == '0' ? '已开始' : '未开始'}}</span>
             </template>
           </el-table-column>
           <el-table-column prop="creator" label="创建人" width="120"></el-table-column>
@@ -50,11 +50,25 @@
             <el-input v-model="testModel.planName" auto-complete="off"></el-input>
           </el-form-item>
           <el-form-item label="版本：" label-width="100px" prop="categoryLevel">
-            <el-input v-model="testModel.versionId" auto-complete="off"></el-input>
+            <el-select v-model="testModel.versionId" placeholder="请选择版本" auto-complete="off" style="width: 224px">
+              <el-option
+                v-for="d in versionList"
+                :key="d.versionId"
+                :label="d.version"
+                :value="d.versionId"
+              >
+                {{d.version}}
+              </el-option>
+            </el-select>
           </el-form-item>
           <el-form-item label="平台：" label-width="100px" >
-            <el-select v-model="testModel.platform" placeholder="请选择平台" auto-complete="off">
-              <el-option v-for="d in platformList" :key="d.id" :value="d.name">{{d.name}}</el-option>
+            <el-select v-model="testModel.platform" placeholder="请选择平台" auto-complete="off" style="width: 224px">
+              <el-option
+                v-for="d in platformList"
+                :key="d.id"
+                :label="d.name"
+                :value="d.id"
+              >{{d.name}}</el-option>
             </el-select>
           </el-form-item>
           <el-form-item style="text-align: center">
@@ -74,53 +88,18 @@
     },
     data() {
       return {
-        colConfigs: [
-          { prop: 'date', label: '日期' },
-          { prop: 'name', label: '姓名' },
-          { prop: 'address', label: '地址' }
-        ],
-        items: [{
-            name: '会员卡',
-            version: '1.1.0',
-            platform: 'ios',
-            status: '开启',
-            creator: '王涵',
-            time: '2020-10-20'
-          }, {
-            name: '会员卡',
-            version: '1.1.0',
-            platform: 'ios',
-            status: '开启',
-            creator: '王涵',
-            time: '2020-10-20'
-          }, {
-            name: '会员卡',
-            version: '1.1.0',
-            platform: 'ios',
-            status: '开启',
-            creator: '王涵',
-            time: '2020-10-20'
-          }, {
-            name: '会员卡',
-            version: '1.1.0',
-            platform: 'ios',
-            status: '开启',
-            creator: '王涵',
-            time: '2020-10-20'
-        }],
-        modifyData: {
-          name: '',
-          version: '',
-          platform: ''
-        },
         platformList: [
           {
             id: 1,
-            name: '红袖',
+            name: 'IOS',
           },
           {
             id: 2,
-            name: '海外',
+            name: 'Android',
+          },
+          {
+            id: 3,
+            name: 'Flutter',
           }
         ],
         modifyFormVisible: false,
@@ -129,20 +108,50 @@
           planName: '',
           versionId: '',
           platform: '',
+          pointList: []
         }, // 测试计划单元
+        groupId: '',
+        versionList: [],
       }
     },
+
     mounted () {
-      this.$fetch({
-        url: '/eventTracking/api/testPlan/list'
-      }).then((res) => {
-        if (res.code === 0) {
-          this.testList = res.data.list
-          console.log(this.testList)
-        }
-      })
+      this.groupId = this.$store.state.common.groupId
+
+      this.loadData()
     },
     methods: {
+      loadData() {
+        var p1 = new Promise((resolve, reject) => {
+          this.$fetch({
+            url: '/eventTracking/api/testPlan/list',
+            data: {
+              groupId: this.groupId,
+            }
+          }).then((res) => {
+            if (res.code === 0) {
+              this.testList = res.data.list
+            }
+          })
+        });
+
+        var p2 = new Promise((resolve,reject)=>{
+          this.$fetch({
+            url: '/eventTracking/api/version/list',
+            data: {
+              groupId: this.groupId,
+            }
+          }).then((res) => {
+            if (res.code == '0') {
+              this.versionList = Object.assign(this.versionList, res.data.versionList);
+            }
+          })
+        })
+
+        Promise.all([p1,p2]).then(res=>{
+            console.log(res);
+        })
+      },
       handelModal() {
         this.modifyFormVisible = this.modifyFormVisible ? false : true
       },
@@ -161,17 +170,27 @@
 
       },
 
-      goLoglist() {
-        this.$router.push('/logger')
+      goLoglist(index, testPlan) {
+        var testPlanId = testPlan.testPlanId
+        this.$router.push(`/logger?testPlanId=${testPlanId}`)
       },
+
       /*
       * 保存创建
       */
       save() {
-        console.log(this.testModel);
-        console.log('哇哦，保存成功了');
-        this.handelModal()
-        this.$router.push('/logList')
+        this.testModel.groupId = this.groupId;
+        this.$fetch({
+          url: '/eventTracking/api/testPlan/create',
+          type: 'POST',
+          data: this.testModel
+        }).then((res) => {
+          if (res.code == '0') {
+            console.log('哇哦，保存成功了');
+            this.handelModal()
+            this.$router.push('/logList')
+          }
+        })
       },
 
       /*
