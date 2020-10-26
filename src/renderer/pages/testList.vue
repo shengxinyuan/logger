@@ -36,6 +36,10 @@
                 size="mini"
                 type="text"
                 @click="goLoglist(scope.$index, scope.row)">开始测试</el-button>
+              <el-button
+                size="mini"
+                type="text"
+                @click="testDetail(scope.$index, scope.row)">查看详情</el-button>
             </template>
         </el-table-column>
         </el-table>
@@ -81,6 +85,37 @@
             </el-form-item>
         </el-form>
       </el-dialog>
+
+      <el-dialog
+        title="测试用例详情"
+        :visible.sync="detailShow"
+        :modal-append-to-body="false"
+        width="600px"
+        center
+        class="dialog-con"
+      >
+        <el-form :model="testDetailInfo" ref="modifyForm">
+          <el-form-item label="当前进度：" label-width="100px" style="border: 1px solid rgba(153, 153, 153, 0.28)">
+            <span class="span-item">{{`总数：${testDetailInfo.results.totalCount}`}}</span>
+            <span class="span-item">{{`成功：${testDetailInfo.results.successCount}`}}</span>
+            <span class="span-item">{{`失败：${testDetailInfo.results.failedCount}`}}</span>
+            <span class="span-item">{{`未选中：${testDetailInfo.results.unCheckCount}`}}</span>
+            <span class="span-item">{{`忽略：${testDetailInfo.results.ignoreCount}`}}</span>
+          </el-form-item>
+          <el-form-item label="用例名称：" label-width="100px">
+            <span>{{testDetailInfo.testPlanName}}</span>
+          </el-form-item>
+          <el-form-item label="用例版本：" label-width="100px">
+            <span>{{version(testDetailInfo.versionId)}}</span>
+          </el-form-item>
+          <el-form-item label="用例平台：" label-width="100px" >
+            <span>{{platform(testDetailInfo.platform)}}</span>
+          </el-form-item>
+          <el-form-item label="创建人：" label-width="100px" >
+            <span>{{testDetailInfo.operator}}</span>
+          </el-form-item>
+        </el-form>
+      </el-dialog>
   </div>
 </template>
 
@@ -106,7 +141,8 @@
             name: 'Flutter',
           }
         ],
-        modifyFormVisible: false,
+        modifyFormVisible: false, // 是否打开创建用例弹窗
+        detailShow: false, // 是否打开测试用例详情弹窗
         testListInfo: [], // 测试计划列表
         testModel: {
           planName: '',
@@ -116,6 +152,33 @@
         }, // 测试计划单元
         groupId: '',
         versionList: [],
+        testDetailInfo: {
+          testPlanId: 10,
+          testPlanName: "红袖-iOS-8.8.0-202009011011",
+          groupId: 1000,
+          versionId: 1,
+          status: 0,
+          operator: "周怡婷",
+          platform: 1,
+          createTime: "2020-10-14",
+          pointList: [
+            {
+              id: 19,
+              eventId: "hx_A_login_account",
+              versionId: 2,
+              operator: "周怡婷",
+              status: 0,
+              isAvaliable: 1
+            }
+          ],
+          results: {
+            totalCount: 1,
+            successCount: 1,
+            failedCount: 0,
+            unCheckCount: 0,
+            ignoreCount: 0
+          }
+        }
       }
     },
 
@@ -175,6 +238,17 @@
         return '未知平台'
       },
 
+      version(versionId) {
+        var index = this.versionList.findIndex((e) => {
+          if (e.id === versionId) return true
+        })
+
+        if (index != -1) {
+          return this.versionList[index].version
+        }
+        return '未知版本'
+      },
+
       handelModal() {
         this.testModel = {}
         this.modifyFormVisible = this.modifyFormVisible ? false : true
@@ -229,6 +303,25 @@
       },
 
       /*
+      * 查看详情
+      */
+      testDetail(index, testPlan) {
+        const testPlanId = testPlan.testPlanId
+        this.$fetch({
+          url: '/eventTracking/api/testPlan/get',
+          data: {
+            testPlanId: testPlanId,
+          }
+        }).then((res) => {
+          if (res.code == 0) {
+            this.testDetailInfo = res.data
+            // console.log(this.testDetailInfo)
+            this.detailShow = !this.detailShow
+          }
+        })
+      },
+
+      /*
       * 保存创建
       */
       save() {
@@ -276,8 +369,15 @@
   .table {
     width: 100%;
   }
-  .item {}
   .dialog-con {
-    padding-right: 26px;
+    // margin-left: 26px;
+
+    .num-con {
+      border: 1px solid rgba(153, 153, 153, 0.28);
+    }
+
+    .span-item {
+      margin-right: 20px
+    }
   }
 </style>
