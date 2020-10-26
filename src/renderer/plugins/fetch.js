@@ -20,7 +20,7 @@ export default async({
       dataStr = dataStr.substr(0, dataStr.lastIndexOf('&'));
       url = url + '?' + dataStr;
     }
-  } 
+  }
 
   let requestConfig = {
     credentials: 'include',//为了在当前域名内自动发送 cookie (必须)

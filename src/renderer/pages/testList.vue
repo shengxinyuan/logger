@@ -8,20 +8,20 @@
         class="table-con"
       >
         <el-table :data="testList" class="table" stripe border>
-          <el-table-column prop="name" label="计划名称" width="130"></el-table-column>
-          <el-table-column prop="version" label="版本"  width="80"></el-table-column>
+          <el-table-column prop="name" label="计划名称" width="300"></el-table-column>
+          <el-table-column prop="version" label="版本"  width="100"></el-table-column>
           <el-table-column label="平台" width="80">
             <template slot-scope="scope">
               <span>{{platform(scope.row.platform)}}</span>
             </template>
           </el-table-column>
-          <el-table-column label="状态" width="80">
+          <el-table-column label="状态" width="100">
             <template slot-scope="scope">
               <span>{{scope.row.status == '0' ? '已开始' : '未开始'}}</span>
             </template>
           </el-table-column>
+          <el-table-column prop="createTime" label="创建时间" width="150"></el-table-column>
           <el-table-column prop="operator" label="创建人" width="120"></el-table-column>
-          <el-table-column prop="createTime" label="创建时间" width="120"></el-table-column>
           <el-table-column label="操作">
             <template slot-scope="scope">
               <el-button
@@ -35,11 +35,15 @@
               <el-button
                 size="mini"
                 type="text"
-                @click="goLoglist(scope.$index, scope.row)">开始测试</el-button>
+                @click="goLogger(scope.$index, scope.row)">开始测试</el-button>
               <el-button
                 size="mini"
                 type="text"
                 @click="testDetail(scope.$index, scope.row)">查看详情</el-button>
+              <el-button
+                size="mini"
+                type="text"
+                @click="goLogList(scope.$index, scope.row)">修改埋点</el-button>
             </template>
         </el-table-column>
         </el-table>
@@ -182,7 +186,7 @@
       }
     },
 
-    mounted () {
+    activated () {
       this.groupId = this.$store.state.common.groupId
 
       Promise.all([this.loadTestPlanData(), this.loadVersionData()]).then(res=>{
@@ -297,9 +301,14 @@
         });
       },
 
-      goLoglist(index, testPlan) {
-        var testPlanId = testPlan.testPlanId
+      goLogger(index, testPlan) {
+        const testPlanId = testPlan.testPlanId
         this.$router.push(`/logger?testPlanId=${testPlanId}`)
+      },
+
+      goLogList(index, testPlan) {
+        const testPlanId = testPlan.testPlanId
+        this.$router.push(`/logList?testPlanId=${testPlanId}`)
       },
 
       /*
@@ -333,7 +342,7 @@
         }).then((res) => {
           if (res.code == '0') {
             this.handelModal()
-            this.$router.push('/logList')
+            this.$router.push(`/logList?testPlanId=${res.data.testPlanId}`)
           }
         })
       },

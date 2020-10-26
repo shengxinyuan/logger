@@ -73,7 +73,6 @@
               return val['任务版本'] == workBook.SheetNames[0]
             })
           }
-          console.log(data);
           const formatDate = data.map((item) => {
             let infoList = []
             item['event_id'] = item['event_id'] || item.eid
@@ -94,7 +93,7 @@
         }
       },
       excelJsonChange (list) {
-        this.json = [...list]
+        this.json = list
         console.log(list);
       },
       update() {
@@ -105,19 +104,28 @@
           })
           return
         }
+        if (this.json.length === 0) {
+          this.$message({
+            message: '上传失败，请先选择文档',
+            type: 'error'
+          })
+          return
+        }
+        let list = []
+        this.json.forEach((val) => {
+          list.push({
+            eventId: val.raw.event_id,
+            eventPoint: JSON.stringify(val),
+            version: val.raw['任务版本'],
+            isAvaliable: 1
+          })
+        }) 
         this.$fetch({
           url: '/eventTracking/api/eventPoint/uploadList',
           type: 'post',
           data: {
-            groupId: 1000,
-            pointList: [
-              {
-                "eventId": "hx_A_login_account",
-                "eventPoint": "{\"event_id\":\"hx_A_login_account\",\"event_type\":\"A\",\"pagename\":\"login\",\"pdt\":\"login\",\"uiname\":\"account\"}",
-                "version": "8.9.0",
-                "isAvaliable": 1
-              },
-            ]
+            groupId: this.$store.state.common.groupId,
+            pointList: list
           }
         }).then((res) => {
           if (res.code === 0) {
@@ -131,7 +139,6 @@
               type: 'error'
             })
           }
-          console.log(12312,res);
         })
       }
     }

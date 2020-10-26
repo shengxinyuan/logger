@@ -20,7 +20,7 @@
 
     </div>
     <keep-alive>
-      <router-view class="main-cont"/>
+      <router-view class="main-cont" @getLoginStatus="getLoginStatus"/>
     </keep-alive>
 
     <el-dialog
@@ -34,11 +34,12 @@
       :close-on-press-escape="false"
       :show-close="false"
     >
-      <el-form>
+      <el-form @submit.native.prevent>
         <el-form-item label="邮箱：" label-width="60px" prop="categoryName">
           <el-input
             v-model="ywaccount"
             placeholder="请输入阅文邮箱"
+            @change="change"
           ></el-input>
         </el-form-item>
         <el-form-item style="text-align: right">
@@ -89,17 +90,23 @@
       }
     },
     created() {
-      const ywaccount = localStorage.getItem('ywaccount');
-      this.groupId = localStorage.getItem('groupId');
-      if (!ywaccount) {
-        this.dialogVisible = true
-      } else {
-        this.ywaccount = ywaccount
-        this.login()
-      }
-      this.$router.push('/logger')
+      this.getLoginStatus()
     },
     methods: {
+      getLoginStatus() {
+        const ywaccount = localStorage.getItem('ywaccount');
+        this.groupId = localStorage.getItem('groupId');
+        if (!ywaccount) {
+          this.dialogVisible = true
+        } else {
+          this.ywaccount = ywaccount
+          this.login()
+        }
+        this.$router.push('/logger')
+      },
+      change(e) {
+        this.login()
+      },
       login() {
         this.$fetch({
           url: '/eventTracking/api/login',

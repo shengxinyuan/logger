@@ -239,15 +239,50 @@
         fliterName: '',
         dialogVisible: false,
         dialogCheckList: [],
-        dialogList: []
+        dialogList: [],
+        testPlanId: ''
       }
     },
     mounted () {
       this.webSocket()
       this.ip = getIPAdress()
     },
+    activated() {
+      this.updateJson()
+    },
     methods: {
-      filter () {
+      updateJson() {
+        if (this.$store.state.logger.ownLoggerList.length) {
+          this.json = this.$store.state.logger.ownLoggerList
+          this.rawList = this.$store.state.logger.ownLoggerList
+          this.$store.commit('logger_setOwnLoggerList', [])
+        } else if (this.$route.query.testPlanId) {
+          this.testPlanId = this.$route.query.testPlanId
+          
+          this.$fetch({
+            url: '/eventTracking/api/eventPoint/list',
+            data: {
+              groupId: this.$store.state.common.groupId,
+              testPlanId: this.testPlanId
+            }
+          }).then((res) => {
+            if (res.code === 0) {
+              this.pointList = res.data.pointList
+              if (this.pointList && this.pointList.length) {
+                let list = []
+                this.pointList.forEach((val) => {
+                  if (val.isInTestplan === 1) {
+                    list.push(val)
+                  }
+                })
+                this.json = list
+                this.rawList = list
+              }
+            }
+          })
+        }
+      },
+      filter() {
         if (!this.fliterName) {
           this.rawList = this.json
           return 

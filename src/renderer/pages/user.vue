@@ -107,7 +107,9 @@
       },
 
       handleCommand(command) {
-        console.log('退出登录了宁～～～～')
+        localStorage.removeItem('ywaccount')
+        localStorage.removeItem('groupId')
+        this.$emit('getLoginStatus')
       }
     }
   }

@@ -1,5 +1,5 @@
 const state = {
-  loggerList: {}
+  ownLoggerList: []
 }
 
 const getters = {
@@ -7,8 +7,22 @@ const getters = {
 }
 
 const mutations = {
-  logger_setLoggerList(state, res) {
-    state.loggerList = res
+  logger_setOwnLoggerList(state, res) {
+    let list = []
+    if (res && res.length) {
+      res.forEach((val) => {
+        try {
+          list.push(JSON.parse(val.eventPoint))
+        } catch (error) {
+          console.log(error);
+        }
+        console.log('1231231', val);
+      });
+    } else {
+      list = []
+    }
+    console.log(list);
+    state.ownLoggerList = list
   }
 }
 
