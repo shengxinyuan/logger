@@ -4,7 +4,7 @@
       <div class="el-dropdown-link dropdown-title">
         <i class="el-icon-setting user-icon"></i>
         <el-dropdown @command="handleCommand">
-          <span style="margin-left: 4px">
+          <span>
             {{userInfo.userName}}
             <i class="el-icon-caret-bottom el-icon--right"></i>
           </span>
@@ -14,15 +14,15 @@
         </el-dropdown>
       </div>
     </PageHeader>
-    <div style="margin-left: 16px">
+    <div class="user-cont">
       <div class="aside">
         <div class="aside-con">
           <img v-if="imageUrl" :src="imageUrl" class="avatar">
           <span style="display: block">{{userInfo.userName}}</span>
         </div>
       </div>
-      <div class="form">
-        <el-form ref="form" :model="userInfo" label-width="80px">
+      <div class="cont-box">
+        <el-form class="form" ref="form" :model="userInfo" label-width="80px">
           <el-form-item label="用户邮箱:">
             <el-input v-model="userInfo.ywaccount" :disabled="true"></el-input>
           </el-form-item>
@@ -38,7 +38,7 @@
                 v-for="(item, key) in userInfo.groupInfo"
                 :key="key"
                 :label="item.groupName"
-                :value="item.groupId">
+                :value="+item.groupId">
               </el-option>
             </el-select>
           </el-form-item>
@@ -71,7 +71,7 @@
     },
 
     mounted () {
-      this.groupId = this.$store.state.common.groupId
+      
       this.loadData()
     },
 
@@ -80,29 +80,22 @@
         this.$fetch({
           url: '/eventTracking/api/user/info'
         }).then((res) => {
-          if (res.code == '0') {
+          if (+res.code === 0) {
+            this.groupId = +this.$store.state.common.groupId
+            res.data.ywaccount = res.data.ywaccount + '@yuewen.com'
             this.userInfo = Object.assign(this.userInfo, res.data);
           }
         })
       },
 
       save() {
-        var index = this.userInfo.groupList.findIndex((item) => {
-          if (item.groupId == this.groupId) {
-            return true
-          }
-        })
-
-        if (index !== -1) {
-          this.$store.commit('common_setGroupId', this.groupId)
-          localStorage.setItem('groupId', this.groupId);
-        }
+        console.log(this.groupId);
+        this.$store.commit('common_setGroupId', this.groupId)
+        localStorage.setItem('groupId', this.groupId);
 
         this.$message({
-          showClose: true,
-          message:  `已更新到${this.userInfo.groupName}组`,
+          message: '切换成功',
           type: 'success',
-          center: true
         });
       },
 
@@ -128,39 +121,41 @@
     flex-direction: row;
     align-items: center;
   }
-
   .el-dropdown-link {
     cursor: pointer;
   }
-
   .log-btn {
     height: 30px;
   }
+  .user-cont {
+    display: flex;
+  }
   .aside {
-    width: 150px;
+    width: 200px;
     height: 460px;
     background-color: rgba(215, 234, 249, 0.6);
-    display: inline-block;
     display: flex;
-    flex-direction: row;
+    align-items: center;
     justify-content: center;
   }
   .avatar {
     height: 100px;
     width: 100px;
-    margin-top: 20px;
-    padding-bottom: 6px;
+    padding-bottom: 16px;
   }
   .aside-con {
     text-align: center;
+    padding-bottom: 120px;
+  }
+  .cont-box {
+    margin-left: 140px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
   }
   .form {
-    display: inline-block;
+    display: block;
     margin: 16px;
     width: 300px;
-    position: absolute;
-    left: 50%;
-    top: 50%;
-    transform: translate(-50%, -50%);
   }
 </style>

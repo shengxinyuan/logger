@@ -263,7 +263,7 @@
             url: '/eventTracking/api/eventPoint/list',
             data: {
               groupId: this.$store.state.common.groupId,
-              testPlanId: this.testPlanId
+              testplanId: this.testPlanId
             }
           }).then((res) => {
             if (res.code === 0) {
@@ -272,7 +272,7 @@
                 let list = []
                 this.pointList.forEach((val) => {
                   if (val.isInTestplan === 1) {
-                    list.push(val)
+                    list.push(JSON.parse(val.eventPoint))
                   }
                 })
                 this.json = list

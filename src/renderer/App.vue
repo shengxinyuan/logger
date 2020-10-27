@@ -36,11 +36,18 @@
     >
       <el-form @submit.native.prevent>
         <el-form-item label="邮箱：" label-width="60px" prop="categoryName">
-          <el-input
+          <el-autocomplete
+            class="autocomplete"
+            width="400px"
+            size="medium"
             v-model="ywaccount"
+            :fetch-suggestions="querySearch"
             placeholder="请输入阅文邮箱"
-            @change="change"
-          ></el-input>
+            :trigger-on-focus="false"
+            :select-when-unmatched="true"
+            clearable
+            @select="change"
+          ></el-autocomplete>
         </el-form-item>
         <el-form-item style="text-align: right">
           <el-button type="primary" @click="login">确定</el-button>
@@ -59,6 +66,7 @@
         path: '',
         dialogVisible: false,
         ywaccount: '',
+        restaurants: [],
         groupId: '',
         list: [
           {
@@ -93,9 +101,17 @@
       this.getLoginStatus()
     },
     methods: {
+      querySearch(queryString, cb) {
+        if (queryString.includes('@')) {
+          cb([])
+        } else {
+          cb([{ value: `${queryString}@yuewen.com`, address: `${queryString}@yuewen.com` }]);
+        }
+      },
       getLoginStatus() {
         const ywaccount = localStorage.getItem('ywaccount');
         this.groupId = localStorage.getItem('groupId');
+        console.log(localStorage.getItem('groupId'));
         if (!ywaccount) {
           this.dialogVisible = true
         } else {
@@ -133,8 +149,11 @@
                   this.groupId = res.data.groupInfo[0].groupId
                   this.$store.commit('common_setGroupId', this.groupId)
                   localStorage.setItem('groupId', this.groupId);
+                } else {
+                  this.$store.commit('common_setGroupId', this.groupId)
+                  localStorage.setItem('groupId', this.groupId);
                 }
-              } 
+              }
             })
           } else {
             this.$message({
@@ -158,6 +177,9 @@
 .app {
   height: 100vh;
   display: flex;
+  .autocomplete {
+    display: block;
+  }
   .route-list-item {
     text-decoration: none !important;
   }

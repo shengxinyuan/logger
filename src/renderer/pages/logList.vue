@@ -30,11 +30,13 @@
         </el-table-column>
         <el-table-column
           prop="eventId"
-          label="eventId" >
+          label="eventId">
         </el-table-column>
         <el-table-column
           prop="tester"
-          label="测试人员">
+          label="测试人员"
+          :filters="filtersTestList"
+          :filter-method="filterVersionHander">
         </el-table-column>
         <el-table-column
           prop="developerIos"
@@ -72,6 +74,7 @@
         multipleSelection: [],
         testPlanId: '',
         filtersVersion: [],
+        filtersTest: [],
         filtersIOS: [],
         filtersAndroid: [],
       }
@@ -88,7 +91,6 @@
             text: val
           })
         })
-        console.log(list);
         return list
       },
       filtersIOSList() {
@@ -99,7 +101,6 @@
             text: val
           })
         })
-        console.log(list);
         return list
       },
       filtersAndroidList() {
@@ -110,26 +111,27 @@
             text: val
           })
         })
-        console.log(list);
         return list
       },
-    },
-    methods: {
-      formatfilter(data) {
+      filtersTestList() {
         let list = []
-        data && data.list &&data.forEach((val) => {
+        this.filtersTest.forEach((val) => {
           list.push({
             value: val,
             text: val
           })
         })
-        console.log(list);
         return list
       },
+    },
+    methods: {
       getTestPlanId() {
         if (this.$route.query.testPlanId) {
           this.mode = 'test'
           this.testPlanId = this.$route.query.testPlanId
+        } else {
+          this.mode = ''
+          this.testPlanId = ''
         }
       },
       getEventPoint() {
@@ -138,15 +140,16 @@
           url: '/eventTracking/api/eventPoint/list',
           data: {
             groupId: this.$store.state.common.groupId,
-            testPlanId: this.testPlanId
+            testplanId: this.testPlanId
           }
         }).then((res) => {
           if (res.code === 0) {
             this.pointList = res.data.pointList
             if (this.pointList && this.pointList.length) {
+              let selectList = [] 
               this.pointList.forEach((val) => {
                 if (val.isInTestplan === 1) {
-                  this.multipleSelection.push(val)
+                  selectList.push(val)
                 }
                 const eventPoint = JSON.parse(val.eventPoint)
                 val.versionName = eventPoint.raw['任务版本']
@@ -162,7 +165,16 @@
                 if (eventPoint.raw['Android'] && !this.filtersAndroid.includes(eventPoint.raw['Android'])) {
                   this.filtersAndroid.push(eventPoint.raw['Android'])
                 }
+                if (eventPoint.raw['验证'] && !this.filtersTest.includes(eventPoint.raw['验证'])) {
+                  this.filtersTest.push(eventPoint.raw['验证'])
+                }
                 
+              })
+
+              this.$nextTick(() => {
+                selectList.forEach(row => {
+                  this.$refs.logListTable.toggleRowSelection(row);
+                });
               })
             }
           }
