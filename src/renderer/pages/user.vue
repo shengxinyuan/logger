@@ -70,8 +70,7 @@
       }
     },
 
-    mounted () {
-      
+    activated () {
       this.loadData()
     },
 
