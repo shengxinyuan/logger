@@ -41,7 +41,7 @@ function createWindow () {
     globalShortcut.unregister('CommandOrControl+F')
   })
 
-  mainWindow.webContents.openDevTools()
+  // mainWindow.webContents.openDevTools()
 }
 
 app.on('ready', () => {

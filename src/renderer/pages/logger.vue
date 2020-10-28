@@ -1,101 +1,101 @@
 <template>
   <div class="logger">
     <PageHeader title="埋点测试 " :tip="` （${intStatus}  ip：${ip} port：${port}）`"/>
-    <el-tabs v-model="activeName" class="tab">
-      <el-tab-pane label="logger记录" name="record">
-        <div class="table">
-          <div class="flex">
-            <el-col class="list list1">
-              <h5 class="list-title">
-                埋点列表
-                <span class="fliter-box">
-                  <el-input size="small" clearable placeholder="请输入条件" v-model="fliterName" class="input-with-select">
-                    <el-button slot="append" icon="el-icon-search" class="btn" @click="filterRawList"></el-button>
-                  </el-input>
-                </span>
-              </h5>
-              <el-collapse accordion @change="selectTester" class="list-cont">
-                <el-collapse-item v-for="(v, i) in rawList" :key="i" :name="i">
-                  <template slot="title">
-                    <div class="title-box">
-                      <div class="index">{{i + 1}}. </div>
-                      <div class="name">
-                        <div class="txt">{{v.name}}</div>
-                        <div class="txt">{{v.raw['event_id'] || v.raw['eventId']}}</div>
-                      </div>
-                      <StatusSelector v-model="v.status" :info="v" @click.stop.native />
+
+    <div class="tab">
+      <el-button class="clear-btn" @click="clearAll">清除全部数据</el-button>
+      <div class="table">
+        <div class="flex">
+          <el-col class="list list1">
+            <h5 class="list-title">
+              埋点列表
+              <span class="fliter-box">
+                <el-input size="small" clearable placeholder="请输入条件" v-model="fliterName" class="input-with-select">
+                  <el-button slot="append" icon="el-icon-search" class="btn" @click="filterRawList"></el-button>
+                </el-input>
+              </span>
+            </h5>
+            <el-collapse accordion @change="selectTester" class="list-cont">
+              <el-collapse-item v-for="(v, i) in rawList" :key="i" :name="i">
+                <template slot="title">
+                  <div class="title-box">
+                    <div class="index">{{i + 1}}. </div>
+                    <div class="name">
+                      <div class="txt">{{v.name}}</div>
+                      <div class="txt">{{v.raw['event_id'] || v.raw['eventId']}}</div>
                     </div>
-                  </template>
-                  <div class="detail-cont">
-                    <div class="detail-info" v-for="(val, index) in v.infoList.filter((val) => val.value)" :key="index">
-                      <span class="detail-info-key">{{val.key}}:</span>
-                      <span class="detail-info-value">{{val.value}}</span>
-                    </div>
+                    <StatusSelector v-model="v.status" :info="v" @click.stop.native />
                   </div>
-                </el-collapse-item>
-              </el-collapse>
-            </el-col>
-
-            <el-col class="list list2" v-if="selectedItem">
-              <h5 class="list-title">
-                <span class="title-txt">埋点对比</span>
-                <el-button class="" size="mini" icon="el-icon-delete" @click="deleteList('selectedLoggerList')"></el-button>
-                <el-button class="" size="mini" icon="el-icon-s-operation" @click="fliterSelectedLoggerList"></el-button>
-              </h5>
-              <el-collapse class="list2-item-box list-cont">
-                <el-collapse-item 
-                  v-for="(selectedLogger, i) in selectedLoggerList"
-                  :key="i"
-                  :name="i"
-                  class="list2-item" 
-                  :class="selectedLogger.eventId === selectedItem.raw['event_id'] ? 'select' : ''"
-                >
-                  <template slot="title">
-                    <div class="list2-item-title-box">
-                      <p class="flex1">{{selectedLogger.eventId}}</p>
-                      <p class="rightTxt">次数：{{selectedLogger.counter}}</p>
-                    </div>
-                  </template>
-                  <el-collapse class="list2-item-box" v-if="selectedLogger.children">
-                    <el-collapse-item v-for="(item, index) in selectedLogger.children" :key="item.infoList.time" :name="index" class="list2-item">
-                      <template slot="title" >
-                        <div class="list2-item-title-box" @click="showReceivePoint(item.raw.time)">
-                          <p class="flex1 pd-left20">第{{item.num}}次 详细数据</p>
-                        </div>
-                      </template>
-                      <div class="detail-cont">
-                        <div class="detail-info" v-for="(val, index1) in item.infoList" :key="index1">
-                          <template v-if="(dialogCheckList.length && dialogCheckList.includes(val.key)) || dialogCheckList.length === 0">
-                            <span class="detail-info-key">{{val.key}}<statusIcon v-if="selectedLogger.eventId === selectedItem.raw['event_id'] && val.status != 0" :status="val.status" />:</span>
-                            <span class="detail-info-value">{{val.value}}</span>
-                          </template>
-                        </div>
-                      </div>
-                    </el-collapse-item>
-                  </el-collapse>
-                </el-collapse-item>
-              </el-collapse>
-            </el-col>
-
-            <el-col class="list list3">
-              <div class="list-title">
-                <span class="label">埋点记录</span>
-                <el-button size="mini" v-if="!receiveStatus" @click="receiveStatus = !receiveStatus" icon="el-icon-video-play" type="primary">start</el-button>
-                <el-button size="mini" v-else @click="receiveStatus = !receiveStatus" icon="el-icon-video-pause" type="danger">stop</el-button>
-                <el-button size="mini" @click="deleteList('receiveList')" icon="el-icon-delete"></el-button>
-                <el-button size="mini" @click="testAdd1">+</el-button>
-                <el-button size="mini" @click="testAdd2">+</el-button>
-              </div>
-              <div class="list3-item-box list-cont" ref="list3">
-                <div class="list3-item" v-for="(v, i) in receiveList" :key="v.time || i" :class="v.time === rightKey ? 'on' : ''">
-                  {{v}}
+                </template>
+                <div class="detail-cont">
+                  <div class="detail-info" v-for="(val, index) in v.infoList.filter((val) => val.value)" :key="index">
+                    <span class="detail-info-key">{{val.key}}:</span>
+                    <span class="detail-info-value">{{val.value}}</span>
+                  </div>
                 </div>
+              </el-collapse-item>
+            </el-collapse>
+          </el-col>
+
+          <el-col class="list list2" v-if="selectedItem">
+            <h5 class="list-title">
+              <span class="title-txt">埋点对比</span>
+              <el-button class="" size="mini" icon="el-icon-delete" @click="deleteList('selectedLoggerList')"></el-button>
+              <el-button class="" size="mini" icon="el-icon-s-operation" @click="fliterSelectedLoggerList"></el-button>
+            </h5>
+            <el-collapse class="list2-item-box list-cont">
+              <el-collapse-item 
+                v-for="(selectedLogger, i) in selectedLoggerList"
+                :key="i"
+                :name="i"
+                class="list2-item" 
+                :class="selectedLogger.eventId === selectedItem.raw['event_id'] ? 'select' : ''"
+              >
+                <template slot="title">
+                  <div class="list2-item-title-box">
+                    <p class="flex1">{{selectedLogger.eventId}}</p>
+                    <p class="rightTxt">次数：{{selectedLogger.counter}}</p>
+                  </div>
+                </template>
+                <el-collapse class="list2-item-box" v-if="selectedLogger.children">
+                  <el-collapse-item v-for="(item, index) in selectedLogger.children" :key="item.infoList.time" :name="index" class="list2-item">
+                    <template slot="title" >
+                      <div class="list2-item-title-box" @click="showReceivePoint(item.raw.time)">
+                        <p class="flex1 pd-left20">第{{item.num}}次 详细数据</p>
+                      </div>
+                    </template>
+                    <div class="detail-cont">
+                      <div class="detail-info" v-for="(val, index1) in item.infoList" :key="index1">
+                        <template v-if="(dialogCheckList.length && dialogCheckList.includes(val.key)) || dialogCheckList.length === 0">
+                          <span class="detail-info-key">{{val.key}}<statusIcon v-if="selectedLogger.eventId === selectedItem.raw['event_id'] && val.status != 0" :status="val.status" />:</span>
+                          <span class="detail-info-value">{{val.value}}</span>
+                        </template>
+                      </div>
+                    </div>
+                  </el-collapse-item>
+                </el-collapse>
+              </el-collapse-item>
+            </el-collapse>
+          </el-col>
+
+          <el-col class="list list3">
+            <div class="list-title">
+              <span class="label">埋点记录</span>
+              <el-button size="mini" v-if="!receiveStatus" @click="receiveStatus = !receiveStatus" icon="el-icon-video-play" type="primary">start</el-button>
+              <el-button size="mini" v-else @click="receiveStatus = !receiveStatus" icon="el-icon-video-pause" type="danger">stop</el-button>
+              <el-button size="mini" @click="deleteList('receiveList')" icon="el-icon-delete"></el-button>
+              <el-button size="mini" @click="testAdd1">+</el-button>
+              <el-button size="mini" @click="testAdd2">+</el-button>
+            </div>
+            <div class="list3-item-box list-cont" ref="list3">
+              <div class="list3-item" v-for="(v, i) in receiveList" :key="v.time || i" :class="v.time === rightKey ? 'on' : ''">
+                {{v}}
               </div>
-            </el-col>
-          </div>
+            </div>
+          </el-col>
         </div>
-      </el-tab-pane>
-    </el-tabs>
+      </div>
+    </div>
 
     <el-dialog
       title="展示字段"
@@ -129,7 +129,6 @@
       return {
         intStatus: '未连接',
         receiveStatus: true, //是否开始接收数据
-        activeName: 'record',
         json: [
           {
             name: '默认埋点Test',
@@ -434,6 +433,17 @@
       deleteList(list) {
         this[list] = []
       },
+      clearAll() {
+        this.json = []
+        this.rawList = []
+        this.selectedItem = ''
+        this.selectedLoggerList = []
+        this.receiveList = []
+        this.rightKey = ''
+        this.fliterName = ''
+        this.dialogCheckList = []
+        this.dialogList = []
+      },
       // 过滤埋点列表按钮
       fliterSelectedLoggerList () {
         if (this.dialogList.length == 0) {
@@ -534,7 +544,10 @@
   }
 }
 .tab {
-  margin: 10px 15px;
+  margin: 10px 16px;
+}
+.clear-btn {
+  margin: 10px 0;
 }
 .detail-cont {
   display: block;

@@ -11,17 +11,20 @@ const mutations = {
     let list = []
     if (res && res.length) {
       res.forEach((val) => {
-        try {
-          list.push(JSON.parse(val.eventPoint))
-        } catch (error) {
-          console.log(error);
+        if (val.eventPoint) {
+          try {
+            list.push(JSON.parse(val.eventPoint))
+          } catch (error) {
+            console.log(error);
+          }
+        } else {
+          list.push(val)
         }
-        console.log('1231231', val);
+        
       });
     } else {
       list = []
     }
-    console.log(list);
     state.ownLoggerList = list
   }
 }

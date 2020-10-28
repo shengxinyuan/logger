@@ -3,6 +3,7 @@
     <PageHeader title="待测埋点列表" :tip="!mode ? '（请选择埋点开始测试）' : ''"/>
     <div class="table-con">
       <el-button @click="clearFilter">清除所有过滤器</el-button>
+      <span>全部版本共有：{{pointList.length}}个埋点，选中：{{multipleSelection.length}}个埋点</span>
       <el-table
         ref="logListTable"
         :data="pointList"

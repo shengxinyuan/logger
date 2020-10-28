@@ -24,11 +24,11 @@
       :auto-upload="false">
       <i class="el-icon-upload"></i>
       <div class="el-upload__text">将文件拖到此处，或<em>点击上传</em></div>
-      <div slot="tip" class="el-upload__tip">只能上传excel文件</div>
+      <div slot="tip" class="tip-cont">只能上传excel文件</div>
     </el-upload>
     <div class="excel-btn">
-      <el-button @click="update" type="primary">上传远端</el-button>
-      <span class="tip">上传成功后，可以在待测埋点列表查看数据。请验证是否解析正常</span>
+      <el-button @click="update" type="danger">上传远端</el-button>
+      <el-button @click="use" type="primary">立即使用</el-button>
     </div>
   </div>
 </template>
@@ -94,7 +94,10 @@
       },
       excelJsonChange (list) {
         this.json = list
-        console.log(list);
+      },
+      use() {
+        this.$store.commit('logger_setOwnLoggerList', [...this.json])
+          this.$router.push('/logger')
       },
       update() {
         if (this.mode === 'current') {
@@ -130,7 +133,7 @@
         }).then((res) => {
           if (res.code === 0) {
             this.$message({
-              message: '上传成功',
+              message: '上传成功，在埋点列表查看数据。请验证数据是否正常',
               type: 'success'
             })
           } else {
@@ -171,10 +174,11 @@
   .excel-btn {
     text-align: center;
     display: block;
-    margin: 0 auto;
+    margin: 40px auto;
   }
-  .tip {
+  .tip-cont {
     font-size: 14px;
+    margin-top: 20px;
     color: $color3;
   }
 </style>

@@ -1,16 +1,9 @@
 <template>
   <div class="app">
     <div class="side-bar">
-      <el-popover
-        placement="top-start"
-        title="logger"
-        trigger="hover"
-      >
-        <div slot="reference" >
-          <img class="logo" src="./assets/logger-logo.png" alt="">
-        </div>
-      </el-popover>
-
+      <div>
+        <img class="logo" src="./assets/logger-logo.png" alt="">
+      </div>
       <router-link :to="v.path" v-for="(v) in list" :key="v.path" class="route-list-item">
         <div class="icon-box" :class="path == v.path ? 'active':''">
           <img class="icon-item"  :src="v.icon">
@@ -18,6 +11,12 @@
         </div>
       </router-link>
 
+      <router-link to="/user" class="route-list-item last">
+        <div class="icon-box" :class="path == '/user' ? 'active':''">
+          <img class="icon-item" src="./assets/user.png">
+          <div class="icon-label">个人中心</div>
+        </div>
+      </router-link>
     </div>
     <keep-alive>
       <router-view class="main-cont" @getLoginStatus="getLoginStatus"/>
@@ -69,11 +68,11 @@
         restaurants: [],
         groupId: '',
         list: [
-          {
-            path: '/user',
-            txt: '个人中心',
-            icon: require('./assets/user.png')
-          },
+          // {
+          //   path: '/user',
+          //   txt: '个人中心',
+          //   icon: require('./assets/user.png')
+          // },
           {
             path: '/testList',
             txt: '测试计划',
@@ -183,6 +182,11 @@
   .route-list-item {
     text-decoration: none !important;
   }
+  .last {
+    position: absolute;
+    width: 60px;
+    bottom: 40px;
+  }
   .side-bar {
     position: fixed;
     top: 0;
@@ -214,7 +218,7 @@
       width: 100%;
       color: #fff;
       text-align: center;
-      font-size: 10px;
+      font-size: 12px;
       text-decoration: none !important;
     }
   }

@@ -109,11 +109,13 @@
 
 <style lang="scss" scoped>
   .user {
-    height: 525px;
+    height: 100vh;
     background-color: rgba(242, 245, 248, 0.46);
     border-radius: 8px;
     box-shadow: 0px 0px 5px -1px #f8f8f9;
     position: relative;
+    display: flex;
+    flex-direction: column;
   }
   .dropdown-title {
     display: flex;
@@ -128,13 +130,12 @@
   }
   .user-cont {
     display: flex;
+    flex: 1;
   }
   .aside {
     width: 200px;
-    height: 460px;
     background-color: rgba(215, 234, 249, 0.6);
     display: flex;
-    align-items: center;
     justify-content: center;
   }
   .avatar {
@@ -143,13 +144,13 @@
     padding-bottom: 16px;
   }
   .aside-con {
+    margin-top: 140px;
     text-align: center;
-    padding-bottom: 120px;
   }
   .cont-box {
     margin-left: 140px;
+    padding-top: 140px;
     display: flex;
-    align-items: center;
     justify-content: center;
   }
   .form {
