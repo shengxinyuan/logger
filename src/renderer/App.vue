@@ -71,27 +71,27 @@
         list: [
           {
             path: '/user',
-            txt: '个人',
+            txt: '个人中心',
             icon: require('./assets/user.png')
           },
           {
             path: '/testList',
-            txt: '用例',
+            txt: '测试计划',
             icon: require('./assets/testList.png')
           },
           {
             path: '/logList',
-            txt: '埋点',
+            txt: '埋点列表',
             icon: require('./assets/logList.png')
           },
           {
             path: '/excel',
-            txt: '上传',
+            txt: '上传文档',
             icon: require('./assets/excel.png')
           },
           {
             path: '/logger',
-            txt: '测试',
+            txt: '埋点测试',
             icon: require('./assets/logger.png')
           },
         ]
@@ -207,14 +207,14 @@
     .icon-item {
       margin: 0 auto;
       display: block;
-      width: 24px;
+      width: 30px;
     }
     .icon-label {
       margin-top: 6px;
       width: 100%;
       color: #fff;
       text-align: center;
-      font-size: 12px;
+      font-size: 10px;
       text-decoration: none !important;
     }
   }

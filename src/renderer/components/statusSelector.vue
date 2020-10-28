@@ -2,17 +2,18 @@
   <div class="cont">
     <div v-if="show">
       <div class="select-box">
-        <el-button size="mini" type="success" icon="el-icon-check" circle @click="change('success')"></el-button>
-        <el-button size="mini" type="primary" icon="el-icon-edit" @click="change('')" circle></el-button>
-        <el-button size="mini" type="danger" icon="el-icon-close" circle @click="change('danger')"></el-button>
+        <el-button size="mini" type="success" icon="el-icon-check" circle @click="change(1)"></el-button>
+        <el-button size="mini" type="primary" icon="el-icon-edit" @click="change(0)" circle></el-button>
+        <el-button size="mini" type="danger" icon="el-icon-close" circle @click="change(2)"></el-button>
       </div>
     </div>
     <el-button 
       v-else 
+      circle
       size="mini"
       :type="type"
       :icon="icon" 
-      circle @click="toast"
+      @click="toast"
     />
   </div>
 </template>
@@ -32,10 +33,10 @@
     },
     computed: {
       type() {
-        return this.modelVal === 'success' ? 'success' : this.modelVal=== 'danger' ? 'danger' : 'primary'
+        return this.modelVal === 1 ? 'success' : this.modelVal=== 2 ? 'danger' : 'primary'
       },
       icon() {
-        return this.modelVal === 'success' ? 'el-icon-check' : this.modelVal=== 'danger' ? 'el-icon-close' : 'el-icon-edit'
+        return this.modelVal === 1 ? 'el-icon-check' : this.modelVal=== 2 ? 'el-icon-close' : 'el-icon-edit'
       }
     },
     methods: {
@@ -43,9 +44,32 @@
         this.show = !this.show
       },
       change (status) {
-
         this.$emit('change', status)
         this.toast()
+        // 发请求修改状态
+        this.info && this.info.testPlanId && this.$fetch({
+          url: '/eventTracking/api/testPlan/update',
+          type: 'post',
+          data: {
+            testPlanId: this.info.testPlanId,
+            status: 0,
+            pointList: [{
+              status: status,
+              owner: this.$store.state.common.userInfo.userName,
+              pointId: this.info.pointId,
+              tpPointId: this.info.tpPointId,
+              isInTestplan: 1
+            }]
+          }
+        }).then((res) => {
+          if (res.code === 0) {
+            this.$router.push('/testList')
+            this.$message({
+              message: '成功',
+              type: 'success'
+            })
+          }
+        })
       },
     }
   }

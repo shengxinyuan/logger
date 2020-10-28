@@ -1,13 +1,13 @@
 <template>
   <div class="testList">
-    <PageHeader title="测试用例列表"/>
+    <PageHeader title="测试计划列表"/>
     <div class="list-header">
       <el-button type="primary" size="small" class="log-btn" @click="handelModal">创建计划</el-button>
     </div>
       <div
         class="table-con"
       >
-        <el-table :data="testList" class="table" stripe border>
+        <el-table :data="testList" class="table" height="70vh" stripe border>
           <el-table-column prop="name" label="计划名称" width="300"></el-table-column>
           <el-table-column prop="version" label="版本"  width="100"></el-table-column>
           <el-table-column label="平台" width="80">
@@ -377,6 +377,7 @@
   }
   .table {
     width: 100%;
+    overflow: scroll;
   }
   .dialog-con {
     // margin-left: 26px;

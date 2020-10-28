@@ -7,10 +7,10 @@
           <div class="flex">
             <el-col class="list list1">
               <h5 class="list-title">
-                待测埋点列表
+                埋点列表
                 <span class="fliter-box">
                   <el-input size="small" clearable placeholder="请输入条件" v-model="fliterName" class="input-with-select">
-                    <el-button slot="append" icon="el-icon-search" class="btn" @click="filter"></el-button>
+                    <el-button slot="append" icon="el-icon-search" class="btn" @click="filterRawList"></el-button>
                   </el-input>
                 </span>
               </h5>
@@ -23,7 +23,7 @@
                         <div class="txt">{{v.name}}</div>
                         <div class="txt">{{v.raw['event_id'] || v.raw['eventId']}}</div>
                       </div>
-                      <StatusSelector v-model="v.status" @click.stop.native />
+                      <StatusSelector v-model="v.status" :info="v" @click.stop.native />
                     </div>
                   </template>
                   <div class="detail-cont">
@@ -38,8 +38,8 @@
 
             <el-col class="list list2" v-if="selectedItem">
               <h5 class="list-title">
-                <span class="title-txt">功能测试点详情</span>
-                <el-button class="" size="mini" icon="el-icon-delete" @click="clearSelectedLoggerList"></el-button>
+                <span class="title-txt">埋点对比</span>
+                <el-button class="" size="mini" icon="el-icon-delete" @click="deleteList('selectedLoggerList')"></el-button>
                 <el-button class="" size="mini" icon="el-icon-s-operation" @click="fliterSelectedLoggerList"></el-button>
               </h5>
               <el-collapse class="list2-item-box list-cont">
@@ -59,7 +59,7 @@
                   <el-collapse class="list2-item-box" v-if="selectedLogger.children">
                     <el-collapse-item v-for="(item, index) in selectedLogger.children" :key="item.infoList.time" :name="index" class="list2-item">
                       <template slot="title" >
-                        <div class="list2-item-title-box" @click="showRight(item.raw.time)">
+                        <div class="list2-item-title-box" @click="showReceivePoint(item.raw.time)">
                           <p class="flex1 pd-left20">第{{item.num}}次 详细数据</p>
                         </div>
                       </template>
@@ -80,14 +80,14 @@
             <el-col class="list list3">
               <div class="list-title">
                 <span class="label">埋点记录</span>
-                <el-button size="mini" v-if="!status" @click="status = !status" icon="el-icon-video-play" type="primary">start</el-button>
-                <el-button size="mini" v-else @click="status = !status" icon="el-icon-video-pause" type="danger">stop</el-button>
-                <el-button size="mini" @click="clearList" icon="el-icon-delete"></el-button>
+                <el-button size="mini" v-if="!receiveStatus" @click="receiveStatus = !receiveStatus" icon="el-icon-video-play" type="primary">start</el-button>
+                <el-button size="mini" v-else @click="receiveStatus = !receiveStatus" icon="el-icon-video-pause" type="danger">stop</el-button>
+                <el-button size="mini" @click="deleteList('receiveList')" icon="el-icon-delete"></el-button>
                 <el-button size="mini" @click="testAdd1">+</el-button>
                 <el-button size="mini" @click="testAdd2">+</el-button>
               </div>
               <div class="list3-item-box list-cont" ref="list3">
-                <div class="list3-item" v-for="(v, i) in list" :key="v.time || i" :class="v.time === rightKey ? 'on' : ''">
+                <div class="list3-item" v-for="(v, i) in receiveList" :key="v.time || i" :class="v.time === rightKey ? 'on' : ''">
                   {{v}}
                 </div>
               </div>
@@ -103,7 +103,7 @@
       :before-close="handleClose">
       <div>
         <p>备注：(取功能测试点详情第一条的所有字段) </p>
-        <p>(字段少请更新) =》 <el-button size="mini" @click="update">更新字段</el-button></p>
+        <p>(字段少请更新) =》 <el-button size="mini" @click="updateParseInfo">更新字段</el-button></p>
         <el-checkbox-group v-model="dialogCheckList">
           <el-checkbox class="check-item" :label="v" v-for="(v, i) in dialogList" :key="i"></el-checkbox>
         </el-checkbox-group>
@@ -128,7 +128,7 @@
     data() {
       return {
         intStatus: '未连接',
-        status: true,
+        receiveStatus: true, //是否开始接收数据
         activeName: 'record',
         json: [
           {
@@ -140,7 +140,7 @@
               '事件中文名':'默认埋点Test',
               'event_id':'hx_P_test',
               'event_type':'P',
-              'pagename':'testpagename',
+              'pagename':'1',
               'pdt':'Y(0|1 是否当日看到test页面)',
               'extend1': '{"params1":"aaa"}'
             },
@@ -167,7 +167,7 @@
               },
               {
                 key: 'pagename',
-                value: 'testpagename'
+                value: '1'
               },
               {
                 key: 'pdt',
@@ -190,7 +190,7 @@
               '事件中文名':'默认埋点Test',
               'event_id':'hx_P_test',
               'event_type':'P',
-              'pagename':'testpagename',
+              'pagename':'1',
               'pdt':'Y(0|1 是否当日看到test页面)',
               'extend1': '{"params1":"aaa"}'
             },
@@ -217,7 +217,7 @@
               },
               {
                 key: 'pagename',
-                value: 'testpagename'
+                value: '1'
               },
               {
                 key: 'pdt',
@@ -231,8 +231,8 @@
           },
         ],
         selectedItem: '',
-        selectedLoggerList: [],
-        list: [],
+        selectedLoggerList: [], //选择的埋点数据列表
+        receiveList: [], // 接收到的埋点数据列表
         ip: '',
         port: '3003',
         rightKey: '',
@@ -251,6 +251,7 @@
       this.updateJson()
     },
     methods: {
+      // 进入页面后更新数据
       updateJson() {
         if (this.$store.state.logger.ownLoggerList.length) {
           this.json = this.$store.state.logger.ownLoggerList
@@ -258,7 +259,6 @@
           this.$store.commit('logger_setOwnLoggerList', [])
         } else if (this.$route.query.testPlanId) {
           this.testPlanId = this.$route.query.testPlanId
-          
           this.$fetch({
             url: '/eventTracking/api/eventPoint/list',
             data: {
@@ -272,7 +272,15 @@
                 let list = []
                 this.pointList.forEach((val) => {
                   if (val.isInTestplan === 1) {
-                    list.push(JSON.parse(val.eventPoint))
+                    list.push({
+                      ...JSON.parse(val.eventPoint),
+                      isInTestplan: val.isInTestplan,
+                      status: val.status,
+                      tpOperator: val.tpOperator,
+                      pointId: val.pointId,
+                      tpPointId: val.tpPointId,
+                      testPlanId: this.testPlanId
+                    })
                   }
                 })
                 this.json = list
@@ -282,7 +290,8 @@
           })
         }
       },
-      filter() {
+      // 待测埋点列表过滤按钮
+      filterRawList() {
         if (!this.fliterName) {
           this.rawList = this.json
           return 
@@ -291,7 +300,6 @@
         let name = this.fliterName
         this.json.forEach((val) => {
           let status = val.infoList.some((v) => {
-            
             return v && v.value && v.value.toString().includes(name)
           })
           if (status) {
@@ -300,9 +308,11 @@
         })
         this.rawList = list
       },
-      showRight (time) {
+      // 选中后在Receive内标亮展示
+      showReceivePoint (time) {
         this.rightKey = time
       },
+      // 选择埋点进行比较（唯一）
       selectTester(index) {
         this.selectedItem = this.rawList[index]
         if (this.selectedItem) {
@@ -310,8 +320,9 @@
         }
         this.rightKey = ''
       },
+      // 新增埋点数据
       addLogger (event) {
-        if (this.status) {
+        if (this.receiveStatus) {
           let raw = event.data
           if (/^\[HxBI/.test(raw)) {
             // 红袖iOS
@@ -345,8 +356,7 @@
               console.log('android', error);
             }
           } else {
-            console.log(raw);
-            this.list.push(raw)
+            this.receiveList.push(raw)
             return 
           }
 
@@ -355,7 +365,7 @@
             raw['event_id'] = raw.event_id || raw.eid || raw.eventId
           }
 
-          this.list.push(raw)
+          this.receiveList.push(raw)
           if (this.selectedItem) {
             const reg = /^[Y]|\u679a\u4e3e/;
             let hasEventId = false
@@ -367,11 +377,11 @@
               const value = this.selectedItem.raw[k]
               if (!value) {
                 status = 0
-              } else if (value === v) {
+              } else if (value == v) {
                 status = 1
-              } else if (value !== v && (reg.test(value) || k === 'extend1' || k === 'param')) {
+              } else if (value != v && (reg.test(value) || k == 'extend1' || k == 'param')) {
                 status = 3
-              } else if (value !== v && !reg.test(value)) {
+              } else if (value != v && !reg.test(value)) {
                 status = 2
               } else {
                 status = 4
@@ -420,22 +430,23 @@
           })
         }
       },
-      clearList () {
-        this.list = []
+      // 删除
+      deleteList(list) {
+        this[list] = []
       },
-      clearSelectedLoggerList () {
-        this.selectedLoggerList = []
-      },
+      // 过滤埋点列表按钮
       fliterSelectedLoggerList () {
         if (this.dialogList.length == 0) {
-          this.update()
+          this.updateParseInfo()
         }
         this.dialogVisible = true
       },
+      // 关闭筛选字段弹窗
       handleClose(done) {
         done();
       },
-      update() {
+      // 更新解析的字段
+      updateParseInfo() {
         if (
           this.selectedLoggerList &&
           this.selectedLoggerList[0] &&
@@ -450,6 +461,7 @@
           this.dialogCheckList = this.dialogList
         }
       },
+      // webSocket服务
       webSocket () {
         this.socket = new WebSocket('ws://localhost:3003/logger')
         this.socket.addEventListener('open', (event) => {
@@ -460,6 +472,7 @@
         })
         this.socket.addEventListener('message', this.addLogger)
       },
+      // 新增测试数据1
       testAdd1 () {
         this.addLogger({data: JSON.stringify({
           "logtime":"2020-08-14 20:29:49",
@@ -475,7 +488,7 @@
           "event_type":"P",
           "load_source":"1000014",
           "guid":"461415703",
-          "pagename":"settestpagenameting",
+          "pagename":1,
           "pdt":"1",
           "extend1": {
             'aaa': 1,
@@ -483,6 +496,7 @@
           }
         })})
       },
+      // 新增测试数据2
       testAdd2 () {
         this.addLogger({data: JSON.stringify({
           "logtime":"2020-08-14 20:29:49",
@@ -545,8 +559,9 @@
 }
 
 .list-title {
-  height: 40px;
-  line-height: 40px;
+  font-weight: normal;
+  height: 48px;
+  line-height: 48px;
   padding: 0 20px;
   margin: 0;
   font-size: 16px;
@@ -612,6 +627,7 @@
   .list-title {
     background: #fafafa;
     .title-txt {
+      font-weight: normal;
       margin-right: 20px;
     }
   }
@@ -646,6 +662,7 @@
   flex: 1;
   margin-left: 6px;
   .list-title {
+    font-weight: normal;
     border-bottom: 1px solid #E4E7ED;
     background: #fafafa;
     .label {

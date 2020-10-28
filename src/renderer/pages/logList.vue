@@ -7,6 +7,7 @@
         ref="logListTable"
         :data="pointList"
         class="logList-table"
+        height="80vh"
         border
         stripe
         @selection-change="handleSelectionChange"
@@ -22,11 +23,14 @@
           :filter-method="filterVersionHander"
         >
         </el-table-column>
+        <el-table-column label="状态" width="100" v-if="mode">
+          <template slot-scope="scope">
+            <span>{{scope.row.status | filterStatus}}</span>
+          </template>
+        </el-table-column>
         <el-table-column
-          prop="pointId"
-          label="埋点序号"
-          width="100"
-        >
+          prop="eventName"
+          label="事件中文名">
         </el-table-column>
         <el-table-column
           prop="eventId"
@@ -72,6 +76,7 @@
         mode: '', //如有testPlanId，就是测试用例的选择 test
         pointList: [],
         multipleSelection: [],
+        selectList: [],
         testPlanId: '',
         filtersVersion: [],
         filtersTest: [],
@@ -81,6 +86,27 @@
     },
     activated() {
       this.getEventPoint()
+    },
+    filters: {
+      filterStatus(status) {
+        let txt = ''
+        // 0：待验证 1：验证通过 2：验证不通过 -1：无需验证
+        switch (status) {
+          case 0: 
+            txt = '待验证'
+            break;
+          case 1: 
+            txt = '验证成功'
+            break;
+          case 2: 
+            txt = '验证失败'
+            break;
+          default: 
+            txt = ''
+        }
+          
+        return txt
+      }
     },
     computed: {
       filtersVersionList() {
@@ -146,16 +172,17 @@
           if (res.code === 0) {
             this.pointList = res.data.pointList
             if (this.pointList && this.pointList.length) {
-              let selectList = [] 
+              this.selectList = [] 
               this.pointList.forEach((val) => {
                 if (val.isInTestplan === 1) {
-                  selectList.push(val)
+                  this.selectList.push(val)
                 }
                 const eventPoint = JSON.parse(val.eventPoint)
                 val.versionName = eventPoint.raw['任务版本']
                 val.developerIos = eventPoint.raw['iOS']
                 val.developerAndroid = eventPoint.raw['Android']
                 val.tester = eventPoint.raw['验证']
+                val.eventName = eventPoint.raw['事件中文名']
                 if (eventPoint.raw['任务版本'] && !this.filtersVersion.includes(eventPoint.raw['任务版本'])) {
                   this.filtersVersion.push(eventPoint.raw['任务版本'])
                 }
@@ -172,7 +199,7 @@
               })
 
               this.$nextTick(() => {
-                selectList.forEach(row => {
+                this.selectList.forEach(row => {
                   this.$refs.logListTable.toggleRowSelection(row);
                 });
               })
@@ -185,12 +212,26 @@
           let pointList = []
           this.multipleSelection.forEach((val) => {
             pointList.push({
-              status: 0,
-              owner: '',
+              status: val.status || 0,
+              owner: val.tpOperator || '',
               pointId: val.pointId,
-              tpPointId: val.tpPointId
+              tpPointId: val.tpPointId,
+              isInTestplan: 1
             })
           })
+          // 取消选择的也传给后端
+          this.selectList.forEach((val) => {
+            if (!this.multipleSelection.includes(val)) {
+              pointList.push({
+                status: val.status || 0,
+                owner: val.tpOperator || '',
+                pointId: val.pointId,
+                tpPointId: val.tpPointId,
+                isInTestplan: 0
+              })
+            }
+          })
+
           this.$fetch({
             url: '/eventTracking/api/testPlan/update',
             type: 'post',
