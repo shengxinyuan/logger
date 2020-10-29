@@ -79,7 +79,7 @@
             Object.entries(item).forEach(([k, v]) => {
               infoList.push({
                 key: k,
-                value: v.trim()
+                value: v
               })
             })
             return {
