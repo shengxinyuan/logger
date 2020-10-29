@@ -27,10 +27,6 @@
               <el-button
                 size="mini"
                 type="text"
-                @click="handleEdit(scope.$index, scope.row)">编辑</el-button>
-              <el-button
-                size="mini"
-                type="text"
                 @click="handleDelete(scope.$index, scope.row)">删除</el-button>
               <el-button
                 size="mini"
@@ -256,13 +252,6 @@
       handelModal() {
         this.testModel = {}
         this.modifyFormVisible = this.modifyFormVisible ? false : true
-      },
-
-      /*
-      * 编辑用例
-      */
-      handleEdit() {
-        this.handelModal()
       },
 
       /*
