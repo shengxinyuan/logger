@@ -25,7 +25,7 @@
       prop: 'modelVal',
       event: 'change'
     },
-    props: ['modelVal'],
+    props: ['modelVal', 'info'],
     data () {
       return {
         show: false
@@ -47,6 +47,7 @@
         this.$emit('change', status)
         this.toast()
         // 发请求修改状态
+        console.log(this.info, this.info.testPlanId);
         this.info && this.info.testPlanId && this.$fetch({
           url: '/eventTracking/api/testPlan/update',
           type: 'post',
@@ -63,9 +64,8 @@
           }
         }).then((res) => {
           if (res.code === 0) {
-            this.$router.push('/testList')
             this.$message({
-              message: '成功',
+              message: '状态变更成功',
               type: 'success'
             })
           }
