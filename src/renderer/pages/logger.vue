@@ -365,13 +365,15 @@
           }
 
           this.receiveList.push(raw)
+
+          // 选中埋点，埋点比对找到相同的eventId进行比对
           if (this.selectedItem) {
             const reg = /^[Y]|\u679a\u4e3e/;
             let hasEventId = false
             let eventId = raw['event_id'] || raw['eventId']
             let isSelect = this.selectedItem.raw['event_id'] === eventId
             let infoList = []
-            
+
             Object.entries(raw).forEach(([k, v]) => {
               const value = this.selectedItem.raw[k]
               if (!value) {
@@ -391,6 +393,21 @@
                 value: v,
                 status
               })
+            })
+
+            this.selectedItem.infoList.forEach((info) => {
+              if (!/[\u4E00-\u9FA5]+/.test(info.key)) {
+                let res = infoList.some((val) => {
+                  return info.key == val.key
+                })
+                if (!res) {
+                  infoList.push({
+                    key: info.key,
+                    value: '',
+                    status: 2
+                  })
+                }
+              }
             })
             
             this.selectedLoggerList.forEach((val, index) => {
@@ -498,7 +515,6 @@
           "event_type":"P",
           "load_source":"1000014",
           "guid":"461415703",
-          "pagename":1,
           "pdt":"1",
           "extend1": {
             'aaa': 1,
