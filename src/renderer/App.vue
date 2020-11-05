@@ -45,7 +45,7 @@
             :trigger-on-focus="false"
             :select-when-unmatched="true"
             clearable
-            @select="change"
+            @select="login"
           ></el-autocomplete>
         </el-form-item>
         <el-form-item style="text-align: right">
@@ -68,25 +68,20 @@
         restaurants: [],
         groupId: '',
         list: [
-          // {
-          //   path: '/user',
-          //   txt: '个人中心',
-          //   icon: require('./assets/user.png')
-          // },
           {
             path: '/testList',
             txt: '测试计划',
             icon: require('./assets/testList.png')
           },
           {
-            path: '/logList',
-            txt: '埋点列表',
-            icon: require('./assets/logList.png')
-          },
-          {
             path: '/excel',
             txt: '上传文档',
             icon: require('./assets/excel.png')
+          },
+          {
+            path: '/logList',
+            txt: '埋点列表',
+            icon: require('./assets/logList.png')
           },
           {
             path: '/logger',
@@ -118,9 +113,6 @@
           this.login()
         }
         this.$router.push('/logger')
-      },
-      change(e) {
-        this.login()
       },
       login() {
         this.$fetch({

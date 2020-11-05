@@ -396,7 +396,7 @@
             })
 
             this.selectedItem.infoList.forEach((info) => {
-              if (!/[\u4E00-\u9FA5]+/.test(info.key)) {
+              if (!/[\u4E00-\u9FA5]+/.test(info.key) && (info.key != 'iOS') && (info.key != 'Android')) {
                 let res = infoList.some((val) => {
                   return info.key == val.key
                 })

@@ -43,8 +43,59 @@
             </el-select>
           </el-form-item>
         </el-form>
+        <el-button v-if="userInfo.roleId == -1" type="primary" size="small" class="log-btn" @click="openAddUserDialog">新增用户</el-button>
       </div>
     </div>
+
+    <el-dialog
+      title="新增用户"
+      :modal-append-to-body="false"
+      :visible.sync="dialogStatus"
+      width="400px"
+      center
+    >
+      <el-form @submit.native.prevent>
+        <el-form-item label="邮箱:" label-width="60px" prop="categoryName">
+          <el-autocomplete
+            class="autocomplete"
+            width="400px"
+            size="medium"
+            v-model="addUserInfo.ywaccount"
+            :fetch-suggestions="querySearch"
+            placeholder="请输入阅文邮箱"
+            :trigger-on-focus="false"
+            :select-when-unmatched="true"
+            clearable
+          ></el-autocomplete>
+        </el-form-item>
+        <el-form-item label="姓名:" label-width="60px">
+          <el-input v-model="addUserInfo.userName" placeholder="请输入姓名" clearable></el-input>
+        </el-form-item>
+        <el-form-item label="角色:" label-width="60px">
+          <el-select v-model="addUserInfo.roleId" placeholder="请选择角色" style="width: 220px" @change="selectRoleId">
+            <el-option
+              v-for="(item, key) in roleList"
+              :key="key"
+              :label="item.name"
+              :value="item.value">
+            </el-option>
+          </el-select>
+        </el-form-item>
+        <el-form-item label="项目:" label-width="60px">
+          <el-select v-model="addUserInfo.groupIds" placeholder="请选择项目" style="width: 220px" multiple>
+            <el-option
+              v-for="(item, key) in userInfo.groupInfo"
+              :key="key"
+              :label="item.groupName"
+              :value="+item.groupId">
+            </el-option>
+          </el-select>
+        </el-form-item>
+        <el-form-item style="text-align: right">
+          <el-button type="primary" @click="addUser">确定</el-button>
+        </el-form-item>
+      </el-form>
+    </el-dialog>
   </div>
 </template>
 
@@ -67,6 +118,31 @@
           groupInfo: []
         },
         groupId: null,
+        dialogStatus: false,
+        addUserYwaccount: '',
+        addUserGroupId: '',
+        addUserInfo: {
+          userName: '',
+          ywaccount: '',
+          p_account: '',
+          roleId: '',
+          roleName: '',
+          groupIds: []
+        },
+        roleList: [
+          {
+            name: '管理员',
+            value: -1
+          },
+          {
+            name: '开发',
+            value: 1
+          },
+          {
+            name: '测试',
+            value: 2
+          }
+        ]
       }
     },
 
@@ -75,6 +151,43 @@
     },
 
     methods: {
+      selectRoleId() {
+        this.roleList.forEach((item) => {
+          if (item.value === this.addUserInfo.roleId) {
+            this.addUserInfo.roleName = item.name
+          }
+        })
+      },
+      querySearch(queryString, cb) {
+        if (queryString.includes('@')) {
+          cb([])
+        } else {
+          cb([{ value: `${queryString}@yuewen.com`, address: `${queryString}@yuewen.com` }]);
+        }
+      },
+
+      addUser(e) {
+        this.$fetch({
+            url: '/eventTracking/api/admin/userManage',
+            type: 'post',
+            data: {
+              userName: this.addUserInfo.userName,
+              yw_account: this.addUserInfo.ywaccount.replace('@yuewen.com', ''),
+              p_account: this.addUserInfo.p_account,
+              roleId: this.addUserInfo.roleId,
+              roleName: this.addUserInfo.roleName,
+              groupIds: this.addUserInfo.groupIds
+            }
+          }).then((res) => {
+            if (res.code === 0) {
+              this.$message({
+                message: '成功',
+                type: 'success'
+              })
+            }
+          })
+      },
+
       loadData() {
         this.$fetch({
           url: '/eventTracking/api/user/info'
@@ -88,7 +201,6 @@
       },
 
       save() {
-        console.log(this.groupId);
         this.$store.commit('common_setGroupId', this.groupId)
         localStorage.setItem('groupId', this.groupId);
 
@@ -102,6 +214,10 @@
         localStorage.removeItem('ywaccount')
         localStorage.removeItem('groupId')
         this.$emit('getLoginStatus')
+      },
+
+      openAddUserDialog() {
+        this.dialogStatus = true
       }
     }
   }
@@ -126,6 +242,7 @@
     cursor: pointer;
   }
   .log-btn {
+    margin-top: 20px;
     height: 30px;
   }
   .user-cont {
