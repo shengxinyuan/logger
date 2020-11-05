@@ -7,7 +7,7 @@
       <div
         class="table-con"
       >
-        <el-table :data="testList" class="table" height="70vh" stripe border>
+        <el-table :data="testList" class="table" height="80vh" stripe border>
           <el-table-column prop="name" label="计划名称" width="300"></el-table-column>
           <el-table-column prop="version" label="版本"  width="100"></el-table-column>
           <el-table-column label="平台" width="80">

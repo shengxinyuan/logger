@@ -277,9 +277,10 @@
 }
 .table-con {
   margin: 16px;
+  height: calc(100% - 150px);
+  overflow: hidden;
   .logList-table {
     margin-top: 16px;
-    height: 80vh;
     overflow: scroll;
     width: 100%;
   }

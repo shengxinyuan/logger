@@ -25,6 +25,7 @@
       <i class="el-icon-upload"></i>
       <div class="el-upload__text">将文件拖到此处，或<em>点击上传</em></div>
       <div slot="tip" class="tip-cont">只能上传excel文件</div>
+      <div slot="tip" class="tip-cont red">当前项目：「{{project}}」，文档上传远端请注意操作</div>
     </el-upload>
     <div class="excel-btn">
       <el-button @click="update" type="danger">上传远端</el-button>
@@ -53,6 +54,19 @@
           label: '当前任务版本'
         }],
         json: []
+      }
+    },
+    computed: {
+      project() {
+        let groupName = ''
+        let groupId = this.$store.state.common.groupId
+        let groupInfo = this.$store.state.common.userInfo && this.$store.state.common.userInfo.groupInfo
+        groupInfo && groupInfo.length && groupInfo.forEach((item) => {
+          if (item.groupId == groupId) {
+            groupName = item.groupName
+          }
+        })
+        return groupName
       }
     },
     methods: {
@@ -180,5 +194,8 @@
     font-size: 14px;
     margin-top: 20px;
     color: $color3;
+  }
+  .red {
+    color: #f00;
   }
 </style>
