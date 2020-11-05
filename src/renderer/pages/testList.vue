@@ -324,6 +324,13 @@
       */
       save() {
         this.testModel.groupId = this.groupId;
+        if (!this.testModel.versionId) {
+          this.$message({
+            message: '没有版本，不能创建计划',
+            type: 'error'
+          })
+          return
+        }
         this.$fetch({
           url: '/eventTracking/api/testPlan/create',
           type: 'POST',
