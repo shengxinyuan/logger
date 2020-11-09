@@ -17,7 +17,7 @@
           </el-table-column>
           <el-table-column label="状态" width="100">
             <template slot-scope="scope">
-              <span>{{scope.row.status == '0' ? '已开始' : '未开始'}}</span>
+              <span>{{scope.row.status == '0' ? '未开始' : '已完成'}}</span>
             </template>
           </el-table-column>
           <el-table-column prop="createTime" label="创建时间" width="150"></el-table-column>
@@ -258,7 +258,6 @@
       * 删除用例
       */
       handleDelete(index, testPlan) {
-        console.log(testPlan)
         const model = Object.assign(testPlan, {status: -1})
         this.$confirm('删除后不可恢复哦～, 是否继续?', '删除', {
           confirmButtonText: '确定',
@@ -278,6 +277,14 @@
                 center: true
               });
               this.loadTestPlanData()
+            }
+            if(res.code === -1) {
+              this.$message({
+                showClose: true,
+                message:  `该测试计划已完成，不可再修改或删除`,
+                type: 'info',
+                center: true
+              });
             }
           }).catch((err) => {
             this.$message.error(err.msg || '删除失败啦，请重试哇');
